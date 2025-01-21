@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Player } from '../types';
-import { getAllPlayers, deletePlayer } from '../services/playerService';
-import PlayerSelectionModal from '../components/shared/PlayerSelectionModal';
+import { getAllPlayers, deletePlayer, createPlayer, updatePlayer } from '../services/playerService';
+import PlayerManagement from '../components/PlayerManagement';
 import DeleteConfirmationModal from '../components/shared/DeleteConfirmationModal';
 
 function Players() {
@@ -43,10 +43,20 @@ function Players() {
     setShowPlayerModal(true);
   };
 
-  const handlePlayerSelect = async (player: Player) => {
-    await loadPlayers(); // Refresh the player list
-    setShowPlayerModal(false);
-    setEditingPlayer(null);
+  const handleSavePlayer = async (player: Player) => {
+    try {
+      if (editingPlayer) {
+        await updatePlayer(player);
+      } else {
+        await createPlayer(player);
+      }
+      await loadPlayers();
+      setShowPlayerModal(false);
+      setEditingPlayer(null);
+    } catch (error) {
+      console.error('Error saving player:', error);
+      setError('Failed to save player');
+    }
   };
 
   const handleDeletePlayer = (player: Player) => {
@@ -58,7 +68,7 @@ function Players() {
     if (playerToDelete) {
       try {
         await deletePlayer(playerToDelete.id);
-        await loadPlayers(); // Refresh the list after deletion
+        await loadPlayers();
         setShowDeleteConfirmation(false);
         setPlayerToDelete(null);
       } catch (error) {
@@ -183,14 +193,14 @@ function Players() {
       </div>
 
       {showPlayerModal && (
-        <PlayerSelectionModal
-          onSelect={handlePlayerSelect}
+        <PlayerManagement
+          players={players}
+          onSave={handleSavePlayer}
           onClose={() => {
             setShowPlayerModal(false);
             setEditingPlayer(null);
           }}
           onDelete={handleDeletePlayer}
-          title={editingPlayer ? 'Edit Player' : 'Add Player'}
           editingPlayer={editingPlayer}
         />
       )}
