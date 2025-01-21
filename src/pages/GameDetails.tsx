@@ -35,7 +35,7 @@ function GameDetails() {
   }, [id]);
 
   const handleStartGame = () => {
-    navigate(`/game/${id}/play`);
+    navigate(`/games/${id}/play`);
   };
 
   if (loading) {

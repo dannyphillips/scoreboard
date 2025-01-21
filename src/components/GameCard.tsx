@@ -7,7 +7,7 @@ interface GameCardProps {
 
 function GameCard({ game }: GameCardProps) {
   return (
-    <Link to={`/game/${game.id}`}>
+    <Link to={`/games/${game.id}`}>
       <div className="w-72 h-96 bg-white dark:bg-scoreboard-dark-surface rounded-2xl shadow-lg hover:shadow-xl dark:shadow-neon transform hover:-translate-y-1 transition-all duration-200 overflow-hidden border-4 border-scoreboard-light-wood dark:border-scoreboard-dark-primary">
         <div className="relative h-48">
           <img 

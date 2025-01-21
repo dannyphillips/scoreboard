@@ -1,11 +1,10 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { YahtzeeGameProvider } from './context/YahtzeeGameContext';
 import Navigation from './components/Navigation';
-import Home from './pages/Home';
+import Games from './pages/Games';
 import GameDetails from './pages/GameDetails';
-import Yahtzee from './components/games/Yahtzee';
+import Yahtzee from './components/games/yahtzee/Yahtzee';
 import Players from './pages/Players';
 import PlayerDetails from './pages/PlayerDetails';
 
@@ -18,9 +17,9 @@ function App() {
             <Navigation />
             <main className="container mx-auto px-4 py-8">
               <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/game/:id" element={<GameDetails />} />
-                <Route path="/game/:id/play" element={<Yahtzee />} />
+                <Route path="/" element={<Games />} />
+                <Route path="/games/:id" element={<GameDetails />} />
+                <Route path="/games/:id/play" element={<Yahtzee />} />
                 <Route path="/players" element={<Players />} />
                 <Route path="/players/:id" element={<PlayerDetails />} />
               </Routes>

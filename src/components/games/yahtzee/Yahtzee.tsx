@@ -1,3 +1,10 @@
+import React, { useState } from 'react';
+import { useYahtzeeGame } from '../../../context/YahtzeeGameContext';
+import { YahtzeePlayer, YahtzeeCategory } from '../../../types/yahtzee';
+import { YAHTZEE_CATEGORIES } from '../../../config/yahtzeeConfig';
+import PlayerSelectionModal from '../../shared/PlayerSelectionModal';
+import DeleteConfirmationModal from '../../shared/DeleteConfirmationModal';
+
 const getScore = (playerId: string, category: YahtzeeCategory): number | null => {
   if (!scores[playerId]) {
     return 0; // Return 0 for unplayed cells
@@ -57,4 +64,27 @@ const renderScoreCell = (playerId: string, category: YahtzeeCategory) => {
       )}
     </td>
   );
-}; 
+};
+
+// Main Game Component
+function Yahtzee() {
+  const { state, dispatch } = useYahtzeeGame();
+  const [showPlayerModal, setShowPlayerModal] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState<YahtzeePlayer | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [playerToDelete, setPlayerToDelete] = useState<YahtzeePlayer | null>(null);
+  const [selectedCell, setSelectedCell] = useState<{
+    playerId: string;
+    category: YahtzeeCategory;
+  } | null>(null);
+
+  // ... rest of your existing functions and JSX ...
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* ... your existing JSX ... */}
+    </div>
+  );
+}
+
+export default Yahtzee; 
