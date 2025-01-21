@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactConfetti from 'react-confetti';
 import useSound from 'use-sound';
-import { useYahtzeeGame } from '../../../context/YahtzeeGameContext';
-import { YahtzeePlayer, YahtzeeCategory, YahtzeeScore } from '../../../types/yahtzee';
-import { YAHTZEE_CATEGORIES } from '../../../config/yahtzeeConfig';
+import { useYahtzeeGame } from '../../context/YahtzeeGameContext';
+import { YahtzeePlayer, YahtzeeCategory, YahtzeeScore } from '../../types/yahtzee';
+import { YAHTZEE_CATEGORIES } from '../../config/yahtzeeConfig';
+import PlayerSelectionModal from '../shared/PlayerSelectionModal';
+import DeleteConfirmationModal from '../shared/DeleteConfirmationModal';
 
 // Player Management Component
 interface PlayerManagementProps {
@@ -118,19 +120,21 @@ function ScoreGrid({
   } | null>(null);
 
   const getScore = (playerId: string, category: YahtzeeCategory) => {
-    return scores[playerId]?.[category] ?? 0;
+    return scores[playerId]?.[category] ?? null;
   };
 
   const calculateUpperSubtotal = (playerId: string) => {
     return ['ones', 'twos', 'threes', 'fours', 'fives', 'sixes'].reduce((total, category) => {
-      return total + (scores[playerId]?.[category as YahtzeeCategory] ?? 0);
+      const score = scores[playerId]?.[category as YahtzeeCategory] ?? 0;
+      return total + score;
     }, 0);
   };
 
   const calculateLowerSubtotal = (playerId: string) => {
     return ['threeOfAKind', 'fourOfAKind', 'fullHouse', 'smallStraight', 'largeStraight', 'yahtzee', 'chance']
       .reduce((total, category) => {
-        return total + (scores[playerId]?.[category as YahtzeeCategory] ?? 0);
+        const score = scores[playerId]?.[category as YahtzeeCategory] ?? 0;
+        return total + score;
       }, 0);
   };
 
@@ -148,8 +152,8 @@ function ScoreGrid({
       case 'threeOfAKind':
       case 'fourOfAKind':
       case 'chance':
-        // Generate array of possible values from 0 to 30
-        return Array.from({ length: 31 }, (_, i) => i);
+        // Generate array of possible values from 0 to 30, ensuring 0 is first for clearing
+        return [0, ...Array.from({ length: 30 }, (_, i) => i + 1)];
       case 'fullHouse':
         return [0, 25];
       case 'smallStraight':
@@ -181,24 +185,48 @@ function ScoreGrid({
         {isSelected ? (
           <div className="relative">
             <div className="absolute z-10 bg-white dark:bg-scoreboard-dark-surface shadow-lg rounded-lg p-2 -mt-20 max-h-48 overflow-y-auto">
-              {getPossibleScores(category).map(score => (
+              <div
+                className="p-1 hover:bg-scoreboard-dark-primary/20 cursor-pointer border-b dark:border-gray-700"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onScoreSelect(playerId, category, 0);
+                  setSelectedCell(null);
+                }}
+              >
+                Scratch
+              </div>
+              {currentScore !== null && (
                 <div
-                  key={score}
-                  className="p-1 hover:bg-scoreboard-dark-primary/20 cursor-pointer"
+                  className="p-1 hover:bg-scoreboard-dark-primary/20 cursor-pointer border-b dark:border-gray-700"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onScoreSelect(playerId, category, score);
+                    onScoreSelect(playerId, category, null);
                     setSelectedCell(null);
                   }}
                 >
-                  {score === 0 ? 'Scratch' : score}
+                  Clear Score
                 </div>
-              ))}
+              )}
+              {getPossibleScores(category)
+                .filter(score => score !== 0) // Filter out 0 since we handle it separately as "Scratch"
+                .map(score => (
+                  <div
+                    key={score}
+                    className="p-1 hover:bg-scoreboard-dark-primary/20 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onScoreSelect(playerId, category, score);
+                      setSelectedCell(null);
+                    }}
+                  >
+                    {score}
+                  </div>
+                ))}
             </div>
           </div>
         ) : (
           <span className="font-cyber text-gray-700 dark:text-gray-300">
-            {currentScore === 0 ? '/' : currentScore}
+            {currentScore === null ? '0' : currentScore === 0 ? '/' : currentScore}
           </span>
         )}
       </td>
@@ -219,12 +247,12 @@ function ScoreGrid({
                 className="p-4 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-scoreboard-dark-bg"
                 onClick={() => onEditPlayer(player)}
               >
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center group">
                   <div 
-                    className="w-4 h-4 rounded-full mb-2"
+                    className="w-4 h-4 rounded-full mb-2 group-hover:ring-2 group-hover:ring-scoreboard-dark-primary group-hover:ring-offset-2 transition-all"
                     style={{ backgroundColor: player.color }}
                   />
-                  <span className="font-cyber text-scoreboard-light-tree dark:text-scoreboard-dark-primary">
+                  <span className="font-cyber text-scoreboard-light-tree dark:text-scoreboard-dark-primary group-hover:text-scoreboard-dark-primary">
                     {player.name}
                   </span>
                 </div>
@@ -571,10 +599,12 @@ function Summary({ players, scores }: SummaryProps) {
 function Yahtzee() {
   const { state, dispatch } = useYahtzeeGame();
   const [showPlayerModal, setShowPlayerModal] = useState(false);
-  const [editingPlayer, setEditingPlayer] = useState<YahtzeePlayer | undefined>();
+  const [editingPlayer, setEditingPlayer] = useState<YahtzeePlayer | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [playerToDelete, setPlayerToDelete] = useState<YahtzeePlayer | null>(null);
 
   const handleAddPlayer = () => {
-    setEditingPlayer(undefined);
+    setEditingPlayer(null);
     setShowPlayerModal(true);
   };
 
@@ -583,16 +613,31 @@ function Yahtzee() {
     setShowPlayerModal(true);
   };
 
-  const handleSavePlayer = (player: YahtzeePlayer) => {
+  const handlePlayerSelect = (player: YahtzeePlayer) => {
     if (editingPlayer) {
-      dispatch({ type: 'EDIT_PLAYER', player });
+      dispatch({ type: 'UPDATE_PLAYER', player: { ...player, id: editingPlayer.id } });
     } else {
       dispatch({ type: 'ADD_PLAYER', player });
     }
     setShowPlayerModal(false);
+    setEditingPlayer(null);
   };
 
-  const handleScoreSelect = (playerId: string, category: YahtzeeCategory, value: number) => {
+  const handleDeletePlayer = (player: YahtzeePlayer) => {
+    setPlayerToDelete(player);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDeletePlayer = () => {
+    if (playerToDelete) {
+      dispatch({ type: 'REMOVE_PLAYER', playerId: playerToDelete.id });
+      setShowDeleteConfirmation(false);
+      setPlayerToDelete(null);
+      setShowPlayerModal(false);
+    }
+  };
+
+  const handleScoreSelect = (playerId: string, category: YahtzeeCategory, value: number | null) => {
     dispatch({
       type: 'ADD_SCORE',
       score: { playerId, category, value }
@@ -624,35 +669,52 @@ function Yahtzee() {
       />
 
       {showPlayerModal && (
-        <PlayerManagement
-          players={state.players}
-          onSave={handleSavePlayer}
-          onClose={() => setShowPlayerModal(false)}
+        <PlayerSelectionModal
+          onSelect={handlePlayerSelect}
+          onClose={() => {
+            setShowPlayerModal(false);
+            setEditingPlayer(null);
+          }}
+          excludePlayerIds={editingPlayer ? state.players.filter(p => p.id !== editingPlayer.id).map(p => p.id) : state.players.map(p => p.id)}
+          title={editingPlayer ? 'Edit Player' : 'Add Player to Game'}
           editingPlayer={editingPlayer}
+          onDelete={handleDeletePlayer}
+        />
+      )}
+
+      {showDeleteConfirmation && playerToDelete && (
+        <DeleteConfirmationModal
+          title="Delete Player"
+          message={`Are you sure you want to remove ${playerToDelete.name} from the game? This action cannot be undone.`}
+          onConfirm={confirmDeletePlayer}
+          onCancel={() => {
+            setShowDeleteConfirmation(false);
+            setPlayerToDelete(null);
+          }}
         />
       )}
 
       {state.gameStarted && (
-        <div className="mt-4 p-4 bg-white dark:bg-scoreboard-dark-surface rounded-lg shadow-lg">
-          <h2 className="font-cyber text-xl mb-2 text-scoreboard-light-tree dark:text-scoreboard-dark-primary">
-            Current Turn
-          </h2>
-          <div className="flex items-center space-x-2">
-            <div
-              className="w-4 h-4 rounded-full"
-              style={{ backgroundColor: state.players[state.currentTurn]?.color }}
-            />
-            <span className="font-cyber">
-              {state.players[state.currentTurn]?.name}'s turn
-            </span>
+        <>
+          <div className="mt-4 p-4 bg-white dark:bg-scoreboard-dark-surface rounded-lg shadow-lg">
+            <h2 className="font-cyber text-xl mb-2 text-scoreboard-light-tree dark:text-scoreboard-dark-primary">
+              Current Turn
+            </h2>
+            <div className="flex items-center space-x-2">
+              <div
+                className="w-4 h-4 rounded-full"
+                style={{ backgroundColor: state.players[state.currentTurn]?.color }}
+              />
+              <span className="font-cyber">
+                {state.players[state.currentTurn]?.name}'s turn
+              </span>
+            </div>
           </div>
-        </div>
-      )}
 
-      {state.gameStarted && (
-        <div className="mt-8">
-          <Summary players={state.players} scores={state.scores} />
-        </div>
+          <div className="mt-8">
+            <Summary players={state.players} scores={state.scores} />
+          </div>
+        </>
       )}
     </div>
   );

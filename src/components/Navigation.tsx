@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import logoLight from '../assets/images/logo-light.png';
@@ -30,7 +29,7 @@ function Navigation() {
               GAMES
             </Link>
             <Link 
-              to="/users" 
+              to="/players" 
               className="font-display dark:font-cyber dark:font-bold text-lg text-scoreboard-light-tree dark:text-scoreboard-dark-primary hover:text-scoreboard-light-wood dark:hover:text-scoreboard-dark-secondary transition-all tracking-wide dark:tracking-[0.2em] dark:shadow-neon-text hover:scale-105 transform"
             >
               PLAYERS
