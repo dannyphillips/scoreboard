@@ -1,4 +1,4 @@
-import { YahtzeeCategoryConfig } from '../types/yahtzee';
+import { YahtzeeCategoryConfig } from '../../types/yahtzee';
 
 const countMatching = (dice: number[], value: number) => 
   dice.filter(d => d === value).reduce((a, b) => a + b, 0);

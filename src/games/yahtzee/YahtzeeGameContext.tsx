@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { YahtzeePlayer, YahtzeeCategory } from '../types/yahtzee';
-import { createPlayer, updatePlayer, deletePlayer, getPlayer, updateGameHistory } from '../services/playerService';
+import { YahtzeePlayer, YahtzeeCategory } from '../../types/yahtzee';
+import { createPlayer, updatePlayer, deletePlayer, getPlayer, updateGameHistory } from '../../services/playerService';
 
 interface YahtzeeGameState {
   players: YahtzeePlayer[];

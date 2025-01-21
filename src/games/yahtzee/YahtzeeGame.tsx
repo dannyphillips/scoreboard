@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useYahtzeeGame } from '../../games/yahtzee/YahtzeeGameContext';
+import { useYahtzeeGame } from './YahtzeeGameContext';
 import { YahtzeePlayer, YahtzeeCategory } from '../../types/yahtzee';
-import { YAHTZEE_CATEGORIES } from '../../games/yahtzee/yahtzeeConfig';
-import PlayerSelectionModal from '../shared/modals/PlayerSelectionModal';
-import DeleteConfirmationModal from '../DeleteConfirmationModal';
+import { YAHTZEE_CATEGORIES } from './yahtzeeConfig';
+import PlayerSelectionModal from '../../components/PlayerSelectionModal';
+import DeleteConfirmationModal from '../../components/DeleteConfirmationModal';
 
 // Player Management Component
 interface PlayerManagementProps {

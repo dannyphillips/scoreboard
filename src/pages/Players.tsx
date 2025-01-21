@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Player } from '../types';
-import { getAllPlayers, deletePlayer, createPlayer, updatePlayer } from '../services/playerService';
-import PlayerManagement from '../components/PlayerManagement';
-import DeleteConfirmationModal from '../components/shared/DeleteConfirmationModal';
+import { getAllPlayers, deletePlayer } from '../services/playerService';
+import PlayerSelectionModal from '../components/PlayerSelectionModal';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 
 function Players() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -44,19 +44,9 @@ function Players() {
   };
 
   const handleSavePlayer = async (player: Player) => {
-    try {
-      if (editingPlayer) {
-        await updatePlayer(player);
-      } else {
-        await createPlayer(player);
-      }
-      await loadPlayers();
-      setShowPlayerModal(false);
-      setEditingPlayer(null);
-    } catch (error) {
-      console.error('Error saving player:', error);
-      setError('Failed to save player');
-    }
+    await loadPlayers();
+    setShowPlayerModal(false);
+    setEditingPlayer(null);
   };
 
   const handleDeletePlayer = (player: Player) => {
@@ -193,14 +183,14 @@ function Players() {
       </div>
 
       {showPlayerModal && (
-        <PlayerManagement
-          players={players}
-          onSave={handleSavePlayer}
+        <PlayerSelectionModal
+          onSelect={handleSavePlayer}
           onClose={() => {
             setShowPlayerModal(false);
             setEditingPlayer(null);
           }}
           onDelete={handleDeletePlayer}
+          title={editingPlayer ? 'Edit Player' : 'Add Player'}
           editingPlayer={editingPlayer}
         />
       )}
