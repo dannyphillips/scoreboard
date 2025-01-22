@@ -46,93 +46,92 @@ const GAMES: Record<string, Game> = {
   }
 };
 
-function GameDetails() {
-  const { gameId } = useParams<{ gameId: string }>();
+export default function GameDetails() {
+  const { gameId } = useParams();
   const navigate = useNavigate();
   const game = gameId ? GAMES[gameId] : null;
 
   if (!game) {
     return (
-      <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-red-500">Game not found</h1>
-        <button
-          onClick={() => navigate('/')}
-          className="mt-4 px-6 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors duration-200 font-semibold"
-        >
-          Return Home
-        </button>
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-white mb-4">Game not found</h1>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600"
+          >
+            Return Home
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="max-w-4xl mx-auto"
-    >
-      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-        <div className="relative h-80">
-          <img
-            src={game.image}
-            alt={game.name}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/70 flex items-center justify-center">
-            <h1 className="text-5xl font-bold text-white drop-shadow-lg">{game.name}</h1>
-          </div>
-        </div>
-
-        <div className="p-8">
-          <p className="text-xl text-gray-700 dark:text-gray-300 mb-8 leading-relaxed">
-            {game.description}
-          </p>
-
-          <div className="mb-8 bg-gray-50 dark:bg-gray-900/50 p-6 rounded-lg">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white flex items-center">
-              <span className="w-2 h-8 bg-cyan-500 rounded mr-3"></span>
-              Rules
-            </h2>
-            <ul className="list-none space-y-3 text-gray-700 dark:text-gray-300">
-              {game.rules.map((rule, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="text-cyan-500 mr-2">•</span>
-                  {rule}
-                </li>
-              ))}
-            </ul>
+    <div className="min-h-screen bg-gray-900 py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gray-800 rounded-2xl overflow-hidden"
+        >
+          {/* Hero Image */}
+          <div className="relative h-48 md:h-64 bg-gradient-to-r from-cyan-500 to-blue-500">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <h1 className="text-4xl md:text-5xl font-bold text-white text-center px-4">
+                {game.name}
+              </h1>
+            </div>
           </div>
 
-          <div className="mb-12 bg-gray-50 dark:bg-gray-900/50 p-6 rounded-lg">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white flex items-center">
-              <span className="w-2 h-8 bg-cyan-500 rounded mr-3"></span>
-              Features
-            </h2>
-            <ul className="list-none space-y-3 text-gray-700 dark:text-gray-300">
-              {game.features.map((feature, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="text-cyan-500 mr-2">•</span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Content */}
+          <div className="p-6 md:p-8 space-y-6">
+            {/* Description */}
+            <div>
+              <p className="text-gray-300 text-lg">{game.description}</p>
+            </div>
 
-          <div className="flex justify-center">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate(`/games/${game.id}/play`)}
-              className="px-8 py-4 bg-cyan-500 text-white rounded-lg font-bold text-lg hover:bg-cyan-600 transition-all duration-200 shadow-lg hover:shadow-cyan-500/25"
-            >
-              Start Playing
-            </motion.button>
+            {/* Rules and Features in Grid */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Rules */}
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-white">Rules</h2>
+                <ul className="space-y-2">
+                  {game.rules.map((rule, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="text-cyan-500 mr-2">•</span>
+                      <span className="text-gray-300">{rule}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Features */}
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-white">Features</h2>
+                <ul className="space-y-2">
+                  {game.features.map((feature, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="text-cyan-500 mr-2">•</span>
+                      <span className="text-gray-300">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Start Button */}
+            <div className="flex justify-center pt-4">
+              <button
+                onClick={() => navigate(`/games/${game.id}/play`)}
+                className="px-8 py-4 bg-cyan-500 text-white text-xl font-semibold rounded-xl hover:bg-cyan-600 transition-colors"
+              >
+                Start Playing
+              </button>
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </motion.div>
+    </div>
   );
-}
-
-export default GameDetails; 
+} 

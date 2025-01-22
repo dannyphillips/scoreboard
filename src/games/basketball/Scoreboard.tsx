@@ -70,17 +70,15 @@ export default function Scoreboard({
           {/* Goal Score Display */}
           {finalScore && (
             <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
-              <div className="relative">
-                <div className="w-40 h-40 rounded-full border-8 border-yellow-500 flex items-center justify-center transform rotate-[22.5deg]">
-                  <div className="w-40 h-40 rounded-full border-8 border-yellow-500 absolute inset-0 transform -rotate-[45deg]" />
-                  <div className="transform -rotate-[22.5deg]">
-                    <div className="text-5xl font-bold text-yellow-500 text-center">
-                      {finalScore}
-                    </div>
-                    <div className="text-sm text-yellow-500 text-center mt-1">
-                      POINTS
-                    </div>
-                  </div>
+              <div className="bg-gray-800/80 backdrop-blur px-8 py-4 rounded-xl border-2 border-yellow-500 text-center">
+                <div className="text-yellow-500 text-sm font-semibold uppercase tracking-wider mb-1">
+                  Goal
+                </div>
+                <div className="text-4xl font-bold text-yellow-500">
+                  {finalScore}
+                </div>
+                <div className="text-yellow-500 text-sm uppercase tracking-wider mt-1">
+                  Points
                 </div>
               </div>
             </div>
@@ -102,10 +100,13 @@ export default function Scoreboard({
                 key={homeTeam.score}
                 initial={{ scale: 1.2 }}
                 animate={{ scale: 1 }}
-                className="text-[10rem] font-mono font-bold tabular-nums"
-                style={{ color: homeTeam.color, fontFamily: "'Segment7Standard', monospace" }}
+                className="text-[8rem] font-bold tabular-nums"
+                style={{ color: homeTeam.color, fontFamily: "'Wallpoet', monospace" }}
               >
-                {homeTeam.score.toString().padStart(2, '0')}
+                {/* Score display */}
+                <div className="font-['Wallpoet'] text-[8rem] mb-4" style={{ color: homeTeam.color }}>
+                  {String(homeTeam.score).padStart(2, '0')}
+                </div>
               </motion.div>
             </div>
             {/* Point Buttons */}
@@ -144,10 +145,13 @@ export default function Scoreboard({
               key={timeRemaining}
               initial={{ scale: 1.1 }}
               animate={{ scale: 1 }}
-              className="text-[10rem] font-mono font-bold mb-8 tabular-nums tracking-[0.15em]"
-              style={{ color: '#E0E0E0', fontFamily: "'Segment7Standard', monospace" }}
+              className="text-[7rem] font-bold mb-8 tabular-nums tracking-[0.15em]"
+              style={{ color: '#E0E0E0', fontFamily: "'Wallpoet', monospace" }}
             >
-              {formatTime(timeRemaining)}
+              {/* Timer display */}
+              <div className="font-['Wallpoet'] text-[7rem] text-white mb-4">
+                {formatTime(timeRemaining)}
+              </div>
             </motion.div>
             <div className="flex justify-center gap-4">
               <button
@@ -180,10 +184,13 @@ export default function Scoreboard({
                 key={awayTeam.score}
                 initial={{ scale: 1.2 }}
                 animate={{ scale: 1 }}
-                className="text-[10rem] font-mono font-bold tabular-nums"
-                style={{ color: awayTeam.color, fontFamily: "'Segment7Standard', monospace" }}
+                className="text-[8rem] font-bold tabular-nums"
+                style={{ color: awayTeam.color, fontFamily: "'Wallpoet', monospace" }}
               >
-                {awayTeam.score.toString().padStart(2, '0')}
+                {/* Away team score display */}
+                <div className="font-['Wallpoet'] text-[8rem] mb-4" style={{ color: awayTeam.color }}>
+                  {String(awayTeam.score).padStart(2, '0')}
+                </div>
               </motion.div>
             </div>
             {/* Point Buttons */}
@@ -326,7 +333,7 @@ export default function Scoreboard({
                   Play Again
                 </button>
                 <button
-                  onClick={() => navigate('/games')}
+                  onClick={() => navigate('/')}
                   className="px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white text-xl font-semibold rounded-xl"
                 >
                   Exit

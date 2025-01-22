@@ -25,46 +25,52 @@ const initialSettings: BasketballGameSettings = {
 
 export default function Basketball() {
   const [settings, setSettings] = useState<BasketballGameSettings>(initialSettings);
+  const [showSettings, setShowSettings] = useState(true);
   const [isStarted, setIsStarted] = useState(false);
   const [isPaused, setIsPaused] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState(settings.timeLength);
-  const [winner, setWinner] = useState<'home' | 'away' | null>(null);
+  const [winner, setWinner] = useState<BasketballTeam | null>(null);
 
   // Timer effect
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-
-    if (isStarted && !isPaused && timeRemaining > 0) {
-      interval = setInterval(() => {
-        setTimeRemaining(prev => {
-          const newTime = prev - 1;
-          if (newTime <= 0) {
-            setIsPaused(true);
-            checkWinner();
-          }
-          return newTime;
-        });
+    let timer: number | undefined;
+    if (!isPaused && timeRemaining > 0 && !winner) {
+      timer = window.setInterval(() => {
+        setTimeRemaining(prev => Math.max(0, prev - 1));
       }, 1000);
     }
-
     return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
+      if (timer) clearInterval(timer);
     };
-  }, [isStarted, isPaused, timeRemaining]);
+  }, [isPaused, timeRemaining, winner]);
 
   // Check for winner
-  const checkWinner = () => {
-    if (!settings.finalScore) return;
-
-    if (settings.homeTeam.score >= settings.finalScore) {
-      setWinner('home');
-      setIsPaused(true);
-    } else if (settings.awayTeam.score >= settings.finalScore) {
-      setWinner('away');
-      setIsPaused(true);
+  useEffect(() => {
+    if (settings.finalScore) {
+      if (settings.homeTeam.score >= settings.finalScore) {
+        setWinner(settings.homeTeam);
+        setIsPaused(true);
+      } else if (settings.awayTeam.score >= settings.finalScore) {
+        setWinner(settings.awayTeam);
+        setIsPaused(true);
+      }
     }
+    if (timeRemaining === 0) {
+      setIsPaused(true);
+      if (settings.homeTeam.score > settings.awayTeam.score) {
+        setWinner(settings.homeTeam);
+      } else if (settings.awayTeam.score > settings.homeTeam.score) {
+        setWinner(settings.awayTeam);
+      }
+    }
+  }, [settings.homeTeam.score, settings.awayTeam.score, settings.finalScore, timeRemaining]);
+
+  const handleSaveSettings = (newSettings: BasketballGameSettings) => {
+    setSettings(newSettings);
+    setTimeRemaining(newSettings.timeLength);
+    setShowSettings(false);
+    setIsStarted(true);
+    setIsPaused(true);
   };
 
   const handleStart = () => {
@@ -81,33 +87,43 @@ export default function Basketball() {
   };
 
   const handleAddPoints = (team: 'home' | 'away', points: number) => {
-    setSettings(prev => {
-      const newSettings = {
-        ...prev,
-        [team === 'home' ? 'homeTeam' : 'awayTeam']: {
-          ...prev[team === 'home' ? 'homeTeam' : 'awayTeam'],
-          score: Math.max(0, prev[team === 'home' ? 'homeTeam' : 'awayTeam'].score + points)
-        }
-      };
-      return newSettings;
-    });
-    checkWinner();
+    setSettings(prev => ({
+      ...prev,
+      [team === 'home' ? 'homeTeam' : 'awayTeam']: {
+        ...prev[team === 'home' ? 'homeTeam' : 'awayTeam'],
+        score: Math.max(0, prev[team === 'home' ? 'homeTeam' : 'awayTeam'].score + points)
+      }
+    }));
   };
 
   const handleAddTime = (seconds: number) => {
-    setTimeRemaining(prev => prev + seconds);
+    setTimeRemaining(prev => Math.max(0, prev + seconds));
   };
 
   const handleReset = () => {
-    setSettings(initialSettings);
-    setIsStarted(false);
+    setSettings(prev => ({
+      ...prev,
+      homeTeam: { ...prev.homeTeam, score: 0 },
+      awayTeam: { ...prev.awayTeam, score: 0 }
+    }));
+    setTimeRemaining(settings.timeLength);
     setIsPaused(true);
-    setTimeRemaining(initialSettings.timeLength);
     setWinner(null);
   };
 
+  if (showSettings) {
+    return (
+      <GameSettings
+        settings={settings}
+        onSave={handleSaveSettings}
+        onStart={() => setShowSettings(false)}
+        isStarted={isStarted}
+      />
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12 px-4">
+    <div className="min-h-screen bg-gray-900 py-12 px-4">
       <div className="max-w-7xl mx-auto">
         {!isStarted ? (
           <GameSettings
@@ -128,10 +144,13 @@ export default function Basketball() {
               timeRemaining={timeRemaining}
               isPaused={isPaused}
               finalScore={settings.finalScore}
+              winner={winner}
               onPause={handlePause}
               onResume={handleResume}
               onAddPoints={handleAddPoints}
               onAddTime={handleAddTime}
+              onShowSettings={() => setShowSettings(true)}
+              onReset={handleReset}
             />
 
             {/* Winner Display */}
@@ -141,8 +160,8 @@ export default function Basketball() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center"
               >
-                <h2 className="text-4xl font-bold mb-4" style={{ color: settings[`${winner}Team`].color }}>
-                  {winner === 'home' ? 'Home' : 'Away'} Team Wins!
+                <h2 className="text-4xl font-bold mb-4" style={{ color: settings[`${winner.id}Team`].color }}>
+                  {winner.name} Team Wins!
                 </h2>
                 <button
                   onClick={handleReset}
