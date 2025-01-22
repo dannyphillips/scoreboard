@@ -9,15 +9,16 @@ interface YahtzeeGameState {
   gameStarted: boolean;
 }
 
-type YahtzeeGameAction =
+type YahtzeeAction =
   | { type: 'ADD_PLAYER'; player: YahtzeePlayer }
   | { type: 'UPDATE_PLAYER'; player: YahtzeePlayer }
   | { type: 'REMOVE_PLAYER'; playerId: string }
-  | { type: 'ADD_SCORE'; score: { playerId: string; category: YahtzeeCategory; value: number | null } }
+  | { type: 'ADD_SCORE'; score: { playerId: string; category: YahtzeeCategory; value: number } }
   | { type: 'START_GAME' }
   | { type: 'NEXT_TURN' }
   | { type: 'END_GAME' }
-  | { type: 'RESET_GAME' };
+  | { type: 'RESET_GAME' }
+  | { type: 'LOAD_GAME'; state: YahtzeeGameState };
 
 const initialState: YahtzeeGameState = {
   players: [],
@@ -33,10 +34,10 @@ const initializePlayerScores = (): Record<YahtzeeCategory, number> => {
 
 const YahtzeeGameContext = createContext<{
   state: YahtzeeGameState;
-  dispatch: React.Dispatch<YahtzeeGameAction>;
+  dispatch: React.Dispatch<YahtzeeAction>;
 } | undefined>(undefined);
 
-function reducer(state: YahtzeeGameState, action: YahtzeeGameAction): YahtzeeGameState {
+function yahtzeeGameReducer(state: YahtzeeGameState, action: YahtzeeAction): YahtzeeGameState {
   switch (action.type) {
     case 'ADD_PLAYER':
       // Check if player is already in the game
@@ -124,14 +125,23 @@ function reducer(state: YahtzeeGameState, action: YahtzeeGameAction): YahtzeeGam
         scores: resetScores,
       };
 
+    case 'LOAD_GAME':
+      return {
+        ...action.state,
+        players: action.state.players,
+        scores: action.state.scores,
+        currentTurn: action.state.currentTurn,
+        gameStarted: action.state.gameStarted
+      };
+
     default:
       return state;
   }
 }
 
 export function YahtzeeGameProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const [pendingAction, setPendingAction] = useState<YahtzeeGameAction | null>(null);
+  const [state, dispatch] = useReducer(yahtzeeGameReducer, initialState);
+  const [pendingAction, setPendingAction] = useState<YahtzeeAction | null>(null);
 
   useEffect(() => {
     const handleAction = async () => {
@@ -186,7 +196,7 @@ export function YahtzeeGameProvider({ children }: { children: React.ReactNode })
     handleAction();
   }, [pendingAction, state.players, state.scores]);
 
-  const dispatchWithAsync = (action: YahtzeeGameAction) => {
+  const dispatchWithAsync = (action: YahtzeeAction) => {
     if (['ADD_PLAYER', 'UPDATE_PLAYER', 'REMOVE_PLAYER', 'END_GAME'].includes(action.type)) {
       setPendingAction(action);
     } else {

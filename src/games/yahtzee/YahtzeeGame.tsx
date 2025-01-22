@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useYahtzeeGame } from './YahtzeeGameContext';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useYahtzeeGame } from './YahtzeeContext';
 import { YahtzeePlayer, YahtzeeCategory } from '../../types/yahtzee';
 import { YAHTZEE_CATEGORIES } from './yahtzeeConfig';
 import PlayerSelectionModal from '../../components/PlayerSelectionModal';
@@ -99,9 +100,54 @@ function PlayerManagement({ players, onSave, onClose, editingPlayer }: PlayerMan
 interface ScoreGridProps {
   players: YahtzeePlayer[];
   scores: Record<string, Record<YahtzeeCategory, number>>;
-  onScoreSelect: (playerId: string, category: YahtzeeCategory, value: number) => void;
+  onScoreSelect: (playerId: string, category: YahtzeeCategory, value: number | null) => void;
   onAddPlayer: () => void;
   onEditPlayer: (player: YahtzeePlayer) => void;
+}
+
+function TurnsTracker({ 
+  players, 
+  currentTurn,
+  scores 
+}: { 
+  players: YahtzeePlayer[]; 
+  currentTurn: number;
+  scores: Record<string, Record<YahtzeeCategory, number>>;
+}) {
+  const totalTurns = 13; // 13 categories to fill
+  const turnsPerPlayer = players.map(player => {
+    const filledCategories = Object.values(scores[player.id] || {}).filter(score => score !== null).length;
+    return {
+      player,
+      completed: filledCategories,
+      remaining: totalTurns - filledCategories
+    };
+  });
+
+  return (
+    <div className="bg-white dark:bg-scoreboard-dark-surface rounded-lg shadow-lg p-4 mb-4">
+      <h3 className="font-cyber text-lg mb-2 text-black dark:text-white">Turns Remaining</h3>
+      <div className="space-y-2">
+        {turnsPerPlayer.map(({ player, completed, remaining }) => (
+          <div key={player.id} className="flex items-center space-x-2">
+            <div 
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: player.color }}
+            />
+            <span className="font-cyber text-sm text-black dark:text-white">
+              {player.name}: {remaining} turns
+            </span>
+            <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-scoreboard-light-sky dark:bg-scoreboard-dark-primary rounded-full transition-all duration-500"
+                style={{ width: `${(completed / totalTurns) * 100}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function ScoreGrid({
@@ -172,18 +218,24 @@ function ScoreGrid({
   const renderScoreCell = (playerId: string, category: YahtzeeCategory) => {
     const isSelected = selectedCell?.playerId === playerId && selectedCell?.category === category;
     const currentScore = getScore(playerId, category);
+    const hasScore = currentScore !== null;
+    const isScratched = currentScore === 0;
 
     return (
       <td
         key={`${playerId}-${category}`}
-        className="p-2 border dark:border-scoreboard-dark-primary text-center cursor-pointer hover:bg-scoreboard-dark-surface/10"
+        className={`
+          p-3 border dark:border-scoreboard-dark-primary text-center cursor-pointer transition-all
+          ${hasScore ? 'bg-gray-200 dark:bg-scoreboard-dark-bg/70' : 'hover:bg-scoreboard-dark-surface/10'}
+          text-lg font-cyber
+        `}
         onClick={() => setSelectedCell({ playerId, category })}
       >
         {isSelected ? (
           <div className="relative">
-            <div className="absolute z-10 bg-white dark:bg-scoreboard-dark-surface shadow-lg rounded-lg p-2 -mt-20 max-h-48 overflow-y-auto">
+            <div className="absolute z-10 bg-white dark:bg-scoreboard-dark-surface shadow-lg rounded-lg p-2 -translate-x-1/2 left-1/2 min-w-[100px]">
               <div
-                className="p-1 hover:bg-scoreboard-dark-primary/20 cursor-pointer border-b dark:border-gray-700"
+                className="p-2 hover:bg-scoreboard-dark-primary/20 cursor-pointer border-b dark:border-gray-700 text-black dark:text-white"
                 onClick={(e) => {
                   e.stopPropagation();
                   onScoreSelect(playerId, category, 0);
@@ -194,7 +246,7 @@ function ScoreGrid({
               </div>
               {currentScore !== null && (
                 <div
-                  className="p-1 hover:bg-scoreboard-dark-primary/20 cursor-pointer border-b dark:border-gray-700"
+                  className="p-2 hover:bg-scoreboard-dark-primary/20 cursor-pointer border-b dark:border-gray-700 text-black dark:text-white"
                   onClick={(e) => {
                     e.stopPropagation();
                     onScoreSelect(playerId, category, null);
@@ -205,11 +257,11 @@ function ScoreGrid({
                 </div>
               )}
               {getPossibleScores(category)
-                .filter(score => score !== 0) // Filter out 0 since we handle it separately as "Scratch"
+                .filter(score => score !== 0)
                 .map(score => (
                   <div
                     key={score}
-                    className="p-1 hover:bg-scoreboard-dark-primary/20 cursor-pointer"
+                    className="p-2 hover:bg-scoreboard-dark-primary/20 cursor-pointer text-black dark:text-white"
                     onClick={(e) => {
                       e.stopPropagation();
                       onScoreSelect(playerId, category, score);
@@ -222,43 +274,70 @@ function ScoreGrid({
             </div>
           </div>
         ) : (
-          <span className="font-cyber text-gray-700 dark:text-gray-300">
-            {currentScore === null ? '0' : currentScore === 0 ? '/' : currentScore}
+          <span className={`
+            text-xl font-cyber
+            ${isScratched ? 'text-gray-400 dark:text-gray-600' : 'text-black dark:text-white'}
+          `}>
+            {isScratched ? '/' : currentScore ?? '0'}
           </span>
         )}
       </td>
     );
   };
 
+  // Add function to calculate total turns remaining
+  const calculateTurnsRemaining = () => {
+    const totalCategories = 13; // Total number of categories
+    const filledCategories = Object.values(scores).reduce((total, playerScores) => {
+      return total + Object.values(playerScores).filter(score => score !== null).length;
+    }, 0);
+    return totalCategories * players.length - filledCategories;
+  };
+
   return (
-    <div className="overflow-x-auto mb-8">
-      <table className="w-full bg-white dark:bg-scoreboard-dark-surface rounded-lg shadow-lg">
-        <thead>
-          <tr className="border-b dark:border-gray-700">
-            <th className="p-4 text-left font-cyber text-scoreboard-light-tree dark:text-scoreboard-dark-primary">
-              Category
+    <div className="overflow-x-auto mb-8 max-h-[calc(100vh-20rem)] overflow-y-auto">
+      <table className="w-full bg-white dark:bg-scoreboard-dark-surface rounded-lg shadow-lg text-lg">
+        <thead className="sticky top-0 bg-white dark:bg-scoreboard-dark-surface z-10">
+          <tr className="border-b-2 dark:border-gray-700">
+            <th className="p-4 text-left font-cyber text-xl text-black dark:text-white min-w-[200px]">
+              <div className="flex justify-between items-center">
+                <span>Category</span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-cyber text-gray-600 dark:text-gray-400">
+                    {calculateTurnsRemaining()} turns left
+                  </span>
+                  <div className="w-24 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-scoreboard-light-sky dark:bg-scoreboard-dark-primary rounded-full transition-all duration-500"
+                      style={{ 
+                        width: `${100 - (calculateTurnsRemaining() / (13 * players.length)) * 100}%` 
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
             </th>
             {players.map(player => (
               <th 
                 key={player.id}
-                className="p-4 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-scoreboard-dark-bg"
+                className="p-4 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-scoreboard-dark-bg min-w-[120px]"
                 onClick={() => onEditPlayer(player)}
               >
                 <div className="flex flex-col items-center group">
                   <div 
-                    className="w-4 h-4 rounded-full mb-2 group-hover:ring-2 group-hover:ring-scoreboard-dark-primary group-hover:ring-offset-2 transition-all"
+                    className="w-6 h-6 rounded-full mb-2 group-hover:ring-2 group-hover:ring-scoreboard-dark-primary group-hover:ring-offset-2 transition-all shadow-lg"
                     style={{ backgroundColor: player.color }}
                   />
-                  <span className="font-cyber text-scoreboard-light-tree dark:text-scoreboard-dark-primary group-hover:text-scoreboard-dark-primary">
+                  <span className="font-cyber text-lg text-black dark:text-white group-hover:text-scoreboard-dark-primary">
                     {player.name}
                   </span>
                 </div>
               </th>
             ))}
-            <th className="p-4">
+            <th className="p-4 w-16">
               <button
                 onClick={onAddPlayer}
-                className="w-8 h-8 rounded-full bg-scoreboard-light-sky dark:bg-scoreboard-dark-primary text-white font-bold hover:bg-opacity-90"
+                className="w-10 h-10 rounded-full bg-scoreboard-light-sky dark:bg-scoreboard-dark-primary text-white font-bold text-xl hover:bg-opacity-90 shadow-lg"
               >
                 +
               </button>
@@ -268,7 +347,7 @@ function ScoreGrid({
         <tbody>
           {/* Upper Section Header */}
           <tr className="bg-gray-100 dark:bg-scoreboard-dark-bg/50">
-            <td colSpan={players.length + 2} className="p-2 font-cyber font-bold text-lg text-gray-800 dark:text-gray-100">
+            <td colSpan={players.length + 1} className="p-2 font-cyber font-bold text-lg text-gray-800 dark:text-gray-100">
               Upper Section
             </td>
           </tr>
@@ -292,58 +371,68 @@ function ScoreGrid({
                 </div>
               </td>
               {players.map(player => renderScoreCell(player.id, category as YahtzeeCategory))}
-              <td></td>
             </tr>
           ))}
 
           {/* Upper Section Subtotal */}
-          <tr className="bg-gray-50 dark:bg-scoreboard-dark-bg">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold">
+          <tr className="bg-gray-50 dark:bg-scoreboard-dark-bg/50">
+            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold text-black dark:text-white">
               Upper Section Subtotal
             </td>
             {players.map(player => (
-              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber">
+              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber text-black dark:text-white">
                 {calculateUpperSubtotal(player.id)}
               </td>
             ))}
-            <td></td>
           </tr>
 
           {/* Bonus Row */}
-          <tr className="bg-green-50 dark:bg-green-900/20">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber">
+          <tr className="bg-green-50 dark:bg-green-900/30">
+            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber text-black dark:text-white">
               <div className="flex justify-between items-center">
                 <div>
-                  Bonus
-                  <div className="text-xs opacity-50">Score 63+ to get bonus</div>
+                  <span className="font-bold">Bonus</span>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">
+                    Score 63+ to get 35 points bonus
+                  </div>
                 </div>
-                <div className="text-sm font-bold text-scoreboard-dark-primary">35 pts</div>
+                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">35 pts</div>
               </div>
             </td>
-            {players.map(player => (
-              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber">
-                {getUpperBonus(player.id)}
-              </td>
-            ))}
-            <td></td>
+            {players.map(player => {
+              const upperTotal = calculateUpperSubtotal(player.id);
+              const pointsNeeded = Math.max(0, 63 - upperTotal);
+              const hasBonus = upperTotal >= 63;
+              
+              return (
+                <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber">
+                  {hasBonus ? (
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">35</span>
+                  ) : (
+                    <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                      {pointsNeeded} needed
+                    </span>
+                  )}
+                </td>
+              );
+            })}
           </tr>
 
           {/* Upper Section Total */}
-          <tr className="bg-gray-100 dark:bg-scoreboard-dark-bg font-bold">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber">
+          <tr className="bg-gray-100 dark:bg-scoreboard-dark-bg/70">
+            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold text-black dark:text-white">
               Upper Section Total
             </td>
             {players.map(player => (
-              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber">
+              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber font-bold text-black dark:text-white">
                 {calculateUpperSubtotal(player.id) + getUpperBonus(player.id)}
               </td>
             ))}
-            <td></td>
           </tr>
 
           {/* Lower Section Header */}
           <tr className="bg-gray-100 dark:bg-scoreboard-dark-bg/50">
-            <td colSpan={players.length + 2} className="p-2 font-cyber font-bold text-lg text-gray-800 dark:text-gray-100">
+            <td colSpan={players.length + 1} className="p-2 font-cyber font-bold text-lg text-gray-800 dark:text-gray-100">
               Lower Section
             </td>
           </tr>
@@ -367,56 +456,51 @@ function ScoreGrid({
                 </div>
               </td>
               {players.map(player => renderScoreCell(player.id, category as YahtzeeCategory))}
-              <td></td>
             </tr>
           ))}
 
           {/* Lower Section Subtotal */}
-          <tr className="bg-gray-50 dark:bg-scoreboard-dark-bg">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold">
+          <tr className="bg-gray-50 dark:bg-scoreboard-dark-bg/50">
+            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold text-black dark:text-white">
               Lower Section Total
             </td>
             {players.map(player => (
-              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber">
+              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber font-bold text-black dark:text-white">
                 {calculateLowerSubtotal(player.id)}
               </td>
             ))}
-            <td></td>
           </tr>
 
           {/* Grand Total Section */}
-          <tr className="bg-scoreboard-dark-primary/10 dark:bg-scoreboard-dark-primary/20">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber">
+          <tr className="bg-scoreboard-dark-primary/10 dark:bg-scoreboard-dark-primary/30">
+            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold text-black dark:text-white">
               Upper Section Total
             </td>
             {players.map(player => (
-              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber">
+              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber font-bold text-black dark:text-white">
                 {calculateUpperSubtotal(player.id) + getUpperBonus(player.id)}
               </td>
             ))}
-            <td></td>
           </tr>
-          <tr className="bg-scoreboard-dark-primary/10 dark:bg-scoreboard-dark-primary/20">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber">
+          <tr className="bg-scoreboard-dark-primary/10 dark:bg-scoreboard-dark-primary/30">
+            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold text-black dark:text-white">
               Lower Section Total
             </td>
             {players.map(player => (
-              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber">
+              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber font-bold text-black dark:text-white">
                 {calculateLowerSubtotal(player.id)}
               </td>
             ))}
-            <td></td>
           </tr>
-          <tr className="bg-scoreboard-dark-primary/20 dark:bg-scoreboard-dark-primary/30 font-bold text-lg">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber">
+          <tr className="bg-scoreboard-dark-primary/20 dark:bg-scoreboard-dark-primary/50 font-bold text-lg">
+            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold text-black dark:text-white">
               Grand Total
             </td>
             {players.map(player => (
-              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber">
+              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber font-bold text-black dark:text-white">
                 {calculateTotal(player.id)}
               </td>
             ))}
-            <td></td>
           </tr>
         </tbody>
       </table>
@@ -599,6 +683,45 @@ function Yahtzee() {
   const [editingPlayer, setEditingPlayer] = useState<YahtzeePlayer | null>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [playerToDelete, setPlayerToDelete] = useState<YahtzeePlayer | null>(null);
+  const [showResetConfirmation, setShowResetConfirmation] = useState(false);
+
+  // Autosave whenever state changes
+  useEffect(() => {
+    if (state.gameStarted) {
+      const gameState = {
+        players: state.players,
+        scores: state.scores,
+        currentTurn: state.currentTurn,
+        gameStarted: state.gameStarted,
+        savedAt: new Date().toISOString()
+      };
+      localStorage.setItem('yahtzeeGameState', JSON.stringify(gameState));
+    }
+  }, [state]);
+
+  // Load saved game on component mount
+  useEffect(() => {
+    const savedGame = localStorage.getItem('yahtzeeGameState');
+    if (savedGame) {
+      try {
+        const gameState = JSON.parse(savedGame);
+        dispatch({ type: 'LOAD_GAME', state: gameState });
+      } catch (error) {
+        console.error('Error loading saved game:', error);
+        localStorage.removeItem('yahtzeeGameState');
+      }
+    }
+  }, []);
+
+  const handleResetGame = () => {
+    setShowResetConfirmation(true);
+  };
+
+  const confirmResetGame = () => {
+    dispatch({ type: 'RESET_GAME' });
+    localStorage.removeItem('yahtzeeGameState');
+    setShowResetConfirmation(false);
+  };
 
   const handleAddPlayer = () => {
     setEditingPlayer(null);
@@ -635,10 +758,18 @@ function Yahtzee() {
   };
 
   const handleScoreSelect = (playerId: string, category: YahtzeeCategory, value: number | null) => {
-    dispatch({
-      type: 'ADD_SCORE',
-      score: { playerId, category, value }
-    });
+    if (value === null) {
+      // Clear the score
+      dispatch({
+        type: 'ADD_SCORE',
+        score: { playerId, category, value: 0 }
+      });
+    } else {
+      dispatch({
+        type: 'ADD_SCORE',
+        score: { playerId, category, value }
+      });
+    }
   };
 
   return (
@@ -647,14 +778,24 @@ function Yahtzee() {
         <h1 className="font-display dark:font-cyber text-4xl text-scoreboard-light-tree dark:text-scoreboard-dark-primary">
           Yahtzee Scorecard
         </h1>
-        {!state.gameStarted && state.players.length >= 2 && (
-          <button
-            onClick={() => dispatch({ type: 'START_GAME' })}
-            className="px-6 py-3 font-cyber bg-scoreboard-light-sky dark:bg-scoreboard-dark-primary text-white rounded-lg hover:bg-opacity-90"
-          >
-            Start Game
-          </button>
-        )}
+        <div className="flex items-center space-x-4">
+          {!state.gameStarted && state.players.length >= 2 && (
+            <button
+              onClick={() => dispatch({ type: 'START_GAME' })}
+              className="px-6 py-3 font-cyber bg-scoreboard-light-sky dark:bg-scoreboard-dark-primary text-white rounded-lg hover:bg-opacity-90"
+            >
+              Start Game
+            </button>
+          )}
+          {state.gameStarted && (
+            <button
+              onClick={handleResetGame}
+              className="px-6 py-3 font-cyber border-2 border-red-500 dark:border-red-400 text-red-500 dark:text-red-400 rounded-lg hover:bg-red-500/10 dark:hover:bg-red-400/10"
+            >
+              Reset Game
+            </button>
+          )}
+        </div>
       </div>
 
       <ScoreGrid
@@ -691,27 +832,13 @@ function Yahtzee() {
         />
       )}
 
-      {state.gameStarted && (
-        <>
-          <div className="mt-4 p-4 bg-white dark:bg-scoreboard-dark-surface rounded-lg shadow-lg">
-            <h2 className="font-cyber text-xl mb-2 text-scoreboard-light-tree dark:text-scoreboard-dark-primary">
-              Current Turn
-            </h2>
-            <div className="flex items-center space-x-2">
-              <div
-                className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: state.players[state.currentTurn]?.color }}
-              />
-              <span className="font-cyber">
-                {state.players[state.currentTurn]?.name}'s turn
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <Summary players={state.players} scores={state.scores} />
-          </div>
-        </>
+      {showResetConfirmation && (
+        <DeleteConfirmationModal
+          title="Reset Game"
+          message="Are you sure you want to reset the game? All scores will be cleared, but players will remain. This action cannot be undone."
+          onConfirm={confirmResetGame}
+          onCancel={() => setShowResetConfirmation(false)}
+        />
       )}
     </div>
   );

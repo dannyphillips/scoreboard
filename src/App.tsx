@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
-import { YahtzeeGameProvider } from './games/yahtzee/YahtzeeGameContext';
+import { YahtzeeGameProvider } from './games/yahtzee/YahtzeeContext';
 import Navigation from './components/Navigation';
 import Games from './pages/Games';
 import GameDetails from './pages/GameDetails';

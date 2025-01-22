@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import YahtzeeScoreGrid from '../components/YahtzeeScoreGrid';
 import PlayerManagement from '../components/PlayerManagement';
-import { useYahtzeeGame } from '../games/yahtzee/YahtzeeGameContext';
+import { useYahtzeeGame } from '../games/yahtzee/YahtzeeContext';
 import { YahtzeePlayer, YahtzeeCategory } from '../types/yahtzee';
 import GameSummary from '../components/GameSummary';
 import YahtzeeCelebration from '../components/YahtzeeCelebration';
