@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BasketballTeam, TEAM_PRESETS, TeamPreset } from './types';
+import { BasketballTeam, TEAM_PRESETS } from './types';
 import { useNavigate } from 'react-router-dom';
 
 interface ScoreboardProps {
@@ -33,25 +33,25 @@ export default function Scoreboard({
   onReset
 }: ScoreboardProps) {
   const navigate = useNavigate();
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState<boolean>(false);
   
-  const formatTime = (seconds: number) => {
+  const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const handleNewGameClick = () => {
+  const handleNewGameClick = (): void => {
     setShowConfirmDialog(true);
   };
 
-  const handleConfirmNewGame = () => {
+  const handleConfirmNewGame = (): void => {
     setShowConfirmDialog(false);
     onReset();
     onShowSettings();
   };
 
-  const handlePlayAgain = () => {
+  const handlePlayAgain = (): void => {
     onReset();
     onShowSettings();
   };

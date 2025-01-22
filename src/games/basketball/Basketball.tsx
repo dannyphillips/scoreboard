@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import GameSettings from './GameSettings';
 import Scoreboard from './Scoreboard';
@@ -111,6 +111,10 @@ export default function Basketball() {
     setWinner(null);
   };
 
+  const getTeamFromId = (id: string): BasketballTeam => {
+    return id === 'home' ? settings.homeTeam : settings.awayTeam;
+  };
+
   if (showSettings) {
     return (
       <GameSettings
@@ -160,7 +164,7 @@ export default function Basketball() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center"
               >
-                <h2 className="text-4xl font-bold mb-4" style={{ color: settings[`${winner.id}Team`].color }}>
+                <h2 className="text-4xl font-bold mb-4" style={{ color: getTeamFromId(winner.id).color }}>
                   {winner.name} Team Wins!
                 </h2>
                 <button

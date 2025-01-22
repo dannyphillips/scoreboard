@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BasketballGameSettings, BasketballTeam, TIME_PRESETS, SCORE_PRESETS, TEAM_PRESETS } from './types';
-import { generateId } from '../../utils';
+import { BasketballGameSettings, TIME_PRESETS, SCORE_PRESETS, TEAM_PRESETS } from './types';
 import PlayerSelectionModal from '../../components/PlayerSelectionModal';
 
 interface GameSettingsProps {
@@ -15,7 +14,6 @@ export default function GameSettings({
   settings,
   onSave,
   onStart,
-  isStarted
 }: GameSettingsProps) {
   const [localSettings, setLocalSettings] = useState<BasketballGameSettings>(settings);
   const [showPlayerModal, setShowPlayerModal] = useState(false);
