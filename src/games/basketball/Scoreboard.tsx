@@ -58,11 +58,11 @@ export default function Scoreboard({
 
   return (
     <div className="fixed inset-0 bg-gray-900 flex items-center justify-center">
-      <div className="w-full max-w-7xl p-8">
+      <div className="w-full p-4">
         {/* Header with Team Names and Goal Score */}
-        <div className="flex justify-between items-center mb-12 relative">
-          <div className="w-96 h-16 rounded-full" style={{ backgroundColor: homeTeam.color }}>
-            <h2 className="text-4xl font-bold text-white text-center leading-[4rem]">
+        <div className="flex justify-between items-center h-[15vh] relative">
+          <div className="w-[30vw] h-24 rounded-full" style={{ backgroundColor: homeTeam.color }}>
+            <h2 className="text-6xl font-bold text-white text-center leading-[6rem]">
               {homeTeam.name || 'Home Team'}
             </h2>
           </div>
@@ -70,22 +70,22 @@ export default function Scoreboard({
           {/* Goal Score Display */}
           {finalScore && (
             <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
-              <div className="bg-gray-800/80 backdrop-blur px-8 py-4 rounded-xl border-2 border-yellow-500 text-center">
-                <div className="text-yellow-500 text-sm font-semibold uppercase tracking-wider mb-1">
+              <div className="bg-gray-800/80 backdrop-blur px-12 py-6 rounded-xl border-2 border-yellow-500 text-center">
+                <div className="text-yellow-500 text-lg font-semibold uppercase tracking-wider mb-1">
                   Goal
                 </div>
-                <div className="text-4xl font-bold text-yellow-500">
+                <div className="text-6xl font-bold text-yellow-500">
                   {finalScore}
                 </div>
-                <div className="text-yellow-500 text-sm uppercase tracking-wider mt-1">
+                <div className="text-yellow-500 text-lg uppercase tracking-wider mt-1">
                   Points
                 </div>
               </div>
             </div>
           )}
 
-          <div className="w-96 h-16 rounded-full" style={{ backgroundColor: awayTeam.color }}>
-            <h2 className="text-4xl font-bold text-white text-center leading-[4rem]">
+          <div className="w-[30vw] h-24 rounded-full" style={{ backgroundColor: awayTeam.color }}>
+            <h2 className="text-6xl font-bold text-white text-center leading-[6rem]">
               {awayTeam.name || 'Away Team'}
             </h2>
           </div>
@@ -94,7 +94,7 @@ export default function Scoreboard({
         {/* Exit Button */}
         <button
           onClick={() => navigate('/')}
-          className="absolute top-4 right-4 bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-colors"
+          className="absolute top-6 right-6 bg-gray-800 hover:bg-gray-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition-colors text-xl"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -103,41 +103,41 @@ export default function Scoreboard({
         </button>
 
         {/* Main Score and Timer Section */}
-        <div className="flex justify-between items-center gap-8">
+        <div className="flex justify-between items-center gap-8 px-12">
           {/* Home Team */}
           <div className="flex flex-col items-center">
             <img 
               src={TEAM_PRESETS.find(t => t.color === homeTeam.color)?.logo} 
               alt={homeTeam.name}
-              className="w-24 h-24 object-contain mb-2"
+              className="w-40 h-40 object-contain mb-4"
             />
-            <h2 className="text-4xl font-bold text-white mb-4">{homeTeam.name}</h2>
-            <div className="text-[8rem] font-['Wallpoet'] text-white leading-none">
+            <h2 className="text-6xl font-bold text-white mb-6">{homeTeam.name}</h2>
+            <div className="text-[18rem] font-['Wallpoet'] text-white leading-none">
               {String(homeTeam.score).padStart(2, '0')}
             </div>
             {/* Point Buttons */}
-            <div className="mt-8 space-y-4">
+            <div className="mt-12 flex justify-center gap-8">
               <button
                 onClick={() => onAddPoints('home', -1)}
-                className="bg-gray-700 text-white w-14 h-14 rounded-full hover:bg-gray-600 text-xl"
+                className="bg-gray-700 text-white w-20 h-20 rounded-full hover:bg-gray-600 text-3xl"
               >
                 -1
               </button>
               <button
                 onClick={() => onAddPoints('home', 1)}
-                className="bg-gray-700 text-white w-14 h-14 rounded-full hover:bg-gray-600 text-xl"
+                className="bg-gray-700 text-white w-20 h-20 rounded-full hover:bg-gray-600 text-3xl"
               >
                 +1
               </button>
               <button
                 onClick={() => onAddPoints('home', 2)}
-                className="bg-gray-700 text-white w-14 h-14 rounded-full hover:bg-gray-600 text-xl"
+                className="bg-gray-700 text-white w-20 h-20 rounded-full hover:bg-gray-600 text-3xl"
               >
                 +2
               </button>
               <button
                 onClick={() => onAddPoints('home', 3)}
-                className="bg-gray-700 text-white w-14 h-14 rounded-full hover:bg-gray-600 text-xl"
+                className="bg-gray-700 text-white w-20 h-20 rounded-full hover:bg-gray-600 text-3xl"
               >
                 +3
               </button>
@@ -146,29 +146,20 @@ export default function Scoreboard({
 
           {/* Timer and Game Info */}
           <div className="flex flex-col items-center">
-            <div className="text-2xl text-gray-400 mb-2">PERIOD 2</div>
-            <motion.div
-              key={timeRemaining}
-              initial={{ scale: 1.1 }}
-              animate={{ scale: 1 }}
-              className="text-[7rem] font-bold mb-8 tabular-nums tracking-[0.15em]"
-              style={{ color: '#E0E0E0', fontFamily: "'Wallpoet', monospace" }}
-            >
-              {/* Timer display */}
-              <div className="font-['Wallpoet'] text-[7rem] text-white mb-4">
-                {formatTime(timeRemaining)}
-              </div>
-            </motion.div>
-            <div className="flex justify-center gap-4">
+            <div className="text-4xl text-gray-400 mb-4">PERIOD 2</div>
+            <div className="font-['Wallpoet'] text-[20rem] text-white mb-8">
+              {formatTime(timeRemaining)}
+            </div>
+            <div className="flex justify-center gap-8">
               <button
                 onClick={() => onAddTime(-60)}
-                className="bg-gray-800 text-white w-20 h-20 rounded-full hover:bg-gray-700 text-xl"
+                className="bg-gray-800 text-white w-28 h-28 rounded-full hover:bg-gray-700 text-3xl"
               >
                 -1m
               </button>
               <button
                 onClick={isPaused ? onResume : onPause}
-                className={`w-20 h-20 rounded-full text-xl font-semibold ${
+                className={`w-28 h-28 rounded-full text-3xl font-semibold ${
                   isPaused ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
                 } text-white`}
               >
@@ -176,7 +167,7 @@ export default function Scoreboard({
               </button>
               <button
                 onClick={() => onAddTime(60)}
-                className="bg-gray-800 text-white w-20 h-20 rounded-full hover:bg-gray-700 text-xl"
+                className="bg-gray-800 text-white w-28 h-28 rounded-full hover:bg-gray-700 text-3xl"
               >
                 +1m
               </button>
@@ -188,35 +179,35 @@ export default function Scoreboard({
             <img 
               src={TEAM_PRESETS.find(t => t.color === awayTeam.color)?.logo} 
               alt={awayTeam.name}
-              className="w-24 h-24 object-contain mb-2"
+              className="w-40 h-40 object-contain mb-4"
             />
-            <h2 className="text-4xl font-bold text-white mb-4">{awayTeam.name}</h2>
-            <div className="text-[8rem] font-['Wallpoet'] text-white leading-none">
+            <h2 className="text-6xl font-bold text-white mb-6">{awayTeam.name}</h2>
+            <div className="text-[18rem] font-['Wallpoet'] text-white leading-none">
               {String(awayTeam.score).padStart(2, '0')}
             </div>
             {/* Point Buttons */}
-            <div className="mt-8 space-y-4">
+                      <div className="mt-12 flex justify-center gap-8">
               <button
                 onClick={() => onAddPoints('away', -1)}
-                className="bg-gray-700 text-white w-14 h-14 rounded-full hover:bg-gray-600 text-xl"
+                className="bg-gray-700 text-white w-20 h-20 rounded-full hover:bg-gray-600 text-3xl"
               >
                 -1
               </button>
               <button
                 onClick={() => onAddPoints('away', 1)}
-                className="bg-gray-700 text-white w-14 h-14 rounded-full hover:bg-gray-600 text-xl"
+                className="bg-gray-700 text-white w-20 h-20 rounded-full hover:bg-gray-600 text-3xl"
               >
                 +1
               </button>
               <button
                 onClick={() => onAddPoints('away', 2)}
-                className="bg-gray-700 text-white w-14 h-14 rounded-full hover:bg-gray-600 text-xl"
+                className="bg-gray-700 text-white w-20 h-20 rounded-full hover:bg-gray-600 text-3xl"
               >
                 +2
               </button>
               <button
                 onClick={() => onAddPoints('away', 3)}
-                className="bg-gray-700 text-white w-14 h-14 rounded-full hover:bg-gray-600 text-xl"
+                className="bg-gray-700 text-white w-20 h-20 rounded-full hover:bg-gray-600 text-3xl"
               >
                 +3
               </button>
@@ -225,10 +216,10 @@ export default function Scoreboard({
         </div>
 
         {/* New Game Button */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2">
           <button
             onClick={handleNewGameClick}
-            className="bg-red-500 hover:bg-red-600 text-white text-xl font-semibold rounded-2xl px-8 py-4 shadow-lg transform transition-transform hover:scale-105"
+            className="bg-red-500 hover:bg-red-600 text-white text-3xl font-semibold rounded-2xl px-12 py-6 shadow-lg transform transition-transform hover:scale-105"
           >
             New Game
           </button>

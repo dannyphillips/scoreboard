@@ -60,7 +60,7 @@ export default function GameSettings({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800 rounded-2xl p-8 w-full max-w-7xl"
+        className="bg-gray-800 rounded-2xl p-8 w-full"
       >
         <h2 className="text-3xl font-bold text-white mb-8 text-center">Game Settings</h2>
         
@@ -77,7 +77,7 @@ export default function GameSettings({
                   homeTeam: { ...prev.homeTeam, name: e.target.value }
                 }))}
                 placeholder="Home Team Name"
-                className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="text-3xl w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
               <div className="space-y-2">
                 <label className="text-sm text-gray-300">Select Team</label>
@@ -205,7 +205,7 @@ export default function GameSettings({
                   awayTeam: { ...prev.awayTeam, name: e.target.value }
                 }))}
                 placeholder="Away Team Name"
-                className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="text-3xl w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
               <div className="space-y-2">
                 <label className="text-sm text-gray-300">Select Team</label>

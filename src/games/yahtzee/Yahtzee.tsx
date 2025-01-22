@@ -736,7 +736,7 @@ export default function Yahtzee() {
   };
 
   return (
-    <div className="fixed inset-0 bg-white flex flex-col items-center justify-start p-8">
+    <div className="fixed inset-0 bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 flex flex-col items-center justify-start p-8">
       {/* Exit Button */}
       <button
         onClick={() => navigate('/')}
