@@ -330,7 +330,7 @@ function ScoreGrid({
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="border-2 border-gray-300">
             {/* Upper Section */}
             <tr>
               <td rowSpan={8} className="border-r border-gray-300 font-mono font-bold text-sm text-gray-800 text-center align-middle w-8 [writing-mode:vertical-lr] rotate-180">
@@ -736,88 +736,95 @@ export default function Yahtzee() {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900 flex items-center justify-center">
-      <div className="w-full p-8">
-        {/* Exit Button */}
-        <button
-          onClick={() => navigate('/')}
-          className="absolute top-4 right-4 bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-colors"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-          </svg>
-          Exit Game
-        </button>
+    <div className="fixed inset-0 bg-white flex flex-col items-center justify-start p-8">
+      {/* Exit Button */}
+      <button
+        onClick={() => navigate('/')}
+        className="absolute top-4 right-4 bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-colors"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+        </svg>
+        Exit Game
+      </button>
 
-        {/* Scoreboard */}
-        <div className="mt-8">
-          <div className="mb-8 flex justify-between items-center">
-            <h1 className="font-display dark:font-cyber text-4xl text-scoreboard-light-tree dark:text-scoreboard-dark-primary">
-              Yahtzee Scorecard
-            </h1>
-            <div className="flex items-center space-x-4">
-              {!state.gameStarted && state.players.length >= 2 && (
-                <button
-                  onClick={() => dispatch({ type: 'START_GAME' })}
-                  className="px-6 py-3 font-cyber bg-scoreboard-light-sky dark:bg-scoreboard-dark-primary text-white rounded-lg hover:bg-opacity-90"
-                >
-                  Start Game
-                </button>
-              )}
-              {state.gameStarted && (
-                <button
-                  onClick={handleResetGame}
-                  className="px-6 py-3 font-cyber border-2 border-red-500 dark:border-red-400 text-red-500 dark:text-red-400 rounded-lg hover:bg-red-500/10 dark:hover:bg-red-400/10"
-                >
-                  Reset Game
-                </button>
-              )}
-            </div>
+
+      {/* Scoreboard */}
+      <div className="w-full max-w-6xl">
+        <div className="mb-8 flex justify-between items-center">
+      {/* Logo */}
+      <div className="mb-8 mt-4">
+        <img 
+          src="/src/assets/images/games/yahtzee-card.jpg" 
+          alt="Shake N' Score" 
+          className="h-24 object-contain"
+        />
+      </div>
+          <h1 className="font-display dark:blue text-6xl text-blue dark:text-blue">
+            Shake N' Score Scorecard
+          </h1>
+          <div className="flex items-center space-x-4">
+            {!state.gameStarted && state.players.length >= 2 && (
+              <button
+                onClick={() => dispatch({ type: 'START_GAME' })}
+                className="px-6 py-3 font-cyber bg-scoreboard-light-sky dark:bg-scoreboard-dark-primary text-white rounded-lg hover:bg-opacity-90"
+              >
+                Start Game
+              </button>
+            )}
+            {state.gameStarted && (
+              <button
+                onClick={handleResetGame}
+                className="px-6 py-3 font-cyber border-2 border-red-500 dark:border-red-400 text-red-500 dark:text-red-400 rounded-lg hover:bg-red-500/10 dark:hover:bg-red-400/10"
+              >
+                Reset Game
+              </button>
+            )}
           </div>
-
-          <ScoreGrid
-            players={state.players}
-            scores={state.scores}
-            onScoreSelect={handleScoreSelect}
-            onAddPlayer={handleAddPlayer}
-            onEditPlayer={handleEditPlayer}
-          />
-
-          {showPlayerModal && (
-            <PlayerSelectionModal
-              onSelect={handlePlayerSelect}
-              onClose={() => {
-                setShowPlayerModal(false);
-                setEditingPlayer(null);
-              }}
-              excludePlayerIds={editingPlayer ? state.players.filter(p => p.id !== editingPlayer.id).map(p => p.id) : state.players.map(p => p.id)}
-              title={editingPlayer ? 'Edit Player' : 'Add Player to Game'}
-              editingPlayer={editingPlayer}
-              onDelete={handleDeletePlayer}
-            />
-          )}
-
-          {showDeleteConfirmation && playerToDelete && (
-            <DeleteConfirmationModal
-              title="Delete Player"
-              message={`Are you sure you want to remove ${playerToDelete.name} from the game? This action cannot be undone.`}
-              onConfirm={confirmDeletePlayer}
-              onCancel={() => {
-                setShowDeleteConfirmation(false);
-                setPlayerToDelete(null);
-              }}
-            />
-          )}
-
-          {showResetConfirmation && (
-            <DeleteConfirmationModal
-              title="Reset Game"
-              message="Are you sure you want to reset the game? All scores will be cleared, but players will remain. This action cannot be undone."
-              onConfirm={confirmResetGame}
-              onCancel={() => setShowResetConfirmation(false)}
-            />
-          )}
         </div>
+
+        <ScoreGrid
+          players={state.players}
+          scores={state.scores}
+          onScoreSelect={handleScoreSelect}
+          onAddPlayer={handleAddPlayer}
+          onEditPlayer={handleEditPlayer}
+        />
+
+        {showPlayerModal && (
+          <PlayerSelectionModal
+            onSelect={handlePlayerSelect}
+            onClose={() => {
+              setShowPlayerModal(false);
+              setEditingPlayer(null);
+            }}
+            excludePlayerIds={editingPlayer ? state.players.filter(p => p.id !== editingPlayer.id).map(p => p.id) : state.players.map(p => p.id)}
+            title={editingPlayer ? 'Edit Player' : 'Add Player to Game'}
+            editingPlayer={editingPlayer}
+            onDelete={handleDeletePlayer}
+          />
+        )}
+
+        {showDeleteConfirmation && playerToDelete && (
+          <DeleteConfirmationModal
+            title="Delete Player"
+            message={`Are you sure you want to remove ${playerToDelete.name} from the game? This action cannot be undone.`}
+            onConfirm={confirmDeletePlayer}
+            onCancel={() => {
+              setShowDeleteConfirmation(false);
+              setPlayerToDelete(null);
+            }}
+          />
+        )}
+
+        {showResetConfirmation && (
+          <DeleteConfirmationModal
+            title="Reset Game"
+            message="Are you sure you want to reset the game? All scores will be cleared, but players will remain. This action cannot be undone."
+            onConfirm={confirmResetGame}
+            onCancel={() => setShowResetConfirmation(false)}
+          />
+        )}
       </div>
     </div>
   );

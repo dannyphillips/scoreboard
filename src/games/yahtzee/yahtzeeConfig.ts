@@ -74,7 +74,7 @@ export const YAHTZEE_CATEGORIES: Record<string, YahtzeeCategoryConfig> = {
     calculatePossibleScores: (dice) => [countMatching(dice, 6)]
   },
   threeOfAKind: {
-    name: 'Three of a Kind',
+    name: 'Three-bagger',
     description: 'Sum of all dice if you have 3 of the same number',
     maxScore: 30,
     section: 'lower',
@@ -82,7 +82,7 @@ export const YAHTZEE_CATEGORIES: Record<string, YahtzeeCategoryConfig> = {
       hasNOfAKind(dice, 3) ? [dice.reduce((a, b) => a + b, 0)] : [0]
   },
   fourOfAKind: {
-    name: 'Four of a Kind',
+    name: 'Four-bagger',
     description: 'Sum of all dice if you have 4 of the same number',
     maxScore: 30,
     section: 'lower',
@@ -90,35 +90,35 @@ export const YAHTZEE_CATEGORIES: Record<string, YahtzeeCategoryConfig> = {
       hasNOfAKind(dice, 4) ? [dice.reduce((a, b) => a + b, 0)] : [0]
   },
   fullHouse: {
-    name: 'Full House',
+    name: 'Fun House',
     description: 'Three of one number and two of another',
     maxScore: 25,
     section: 'lower',
     calculatePossibleScores: (dice) => [hasFullHouse(dice) ? 25 : 0]
   },
   smallStraight: {
-    name: 'Small Straight',
+    name: 'Shorty',
     description: 'Four sequential dice (1-2-3-4, 2-3-4-5, or 3-4-5-6)',
     maxScore: 30,
     section: 'lower',
     calculatePossibleScores: (dice) => [hasStraight(dice, 4) ? 30 : 0]
   },
   largeStraight: {
-    name: 'Large Straight',
+    name: 'Longy',
     description: 'Five sequential dice (1-2-3-4-5 or 2-3-4-5-6)',
     maxScore: 40,
     section: 'lower',
     calculatePossibleScores: (dice) => [hasStraight(dice, 5) ? 40 : 0]
   },
   yahtzee: {
-    name: 'Yahtzee',
+    name: 'Touchdown',
     description: 'Five of a kind',
     maxScore: 50,
     section: 'lower',
     calculatePossibleScores: (dice) => [hasNOfAKind(dice, 5) ? 50 : 0]
   },
   chance: {
-    name: 'Chance',
+    name: 'Punt',
     description: 'Sum of all dice',
     maxScore: 30,
     section: 'lower',

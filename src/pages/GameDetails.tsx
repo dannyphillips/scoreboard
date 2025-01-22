@@ -6,15 +6,15 @@ import { Game } from '../games/types';
 const GAMES: Record<string, Game> = {
   yahtzee: {
     id: 'yahtzee',
-    name: 'Yahtzee',
-    description: 'A classic dice game of luck and strategy',
-    image: '/src/assets/images/yahtzee-hero.jpg',
+    name: "Shake N' Score",
+    description: 'A thrilling dice game where strategy meets luck',
+    image: '../src/assets/images/games/yahtzee-card.jpg',
     rules: [
       'Roll five dice up to three times per turn',
       'Score points by matching specific combinations',
       'Fill all categories to complete the game',
       'Bonus points for scoring 63+ in the upper section',
-      'Yahtzee bonus for additional Yahtzees after the first'
+      'Extra points for additional five-of-a-kind after the first'
     ],
     features: [
       'Multiple players support',
@@ -28,7 +28,7 @@ const GAMES: Record<string, Game> = {
     id: 'basketball',
     name: 'Basketball',
     description: 'Track basketball game scores and stats',
-    image: '/src/assets/images/basketball-hero.jpg',
+    image: '../src/assets/images/games/basketball-card.jpg',
     rules: [
       'Add points for field goals, three-pointers, and free throws',
       'Track fouls and timeouts',
