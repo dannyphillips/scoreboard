@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BasketballGameSettings, BasketballTeam, TIME_PRESETS, SCORE_PRESETS, TEAM_COLORS } from './types';
+import { BasketballGameSettings, BasketballTeam, TIME_PRESETS, SCORE_PRESETS, TEAM_PRESETS } from './types';
 import { generateId } from '../../utils';
 import PlayerSelectionModal from '../../components/PlayerSelectionModal';
 
@@ -27,26 +27,13 @@ export default function GameSettings({
     onStart();
   };
 
-  const handleTimeSelect = (seconds: number) => {
-    setLocalSettings(prev => ({
-      ...prev,
-      timeLength: seconds
-    }));
-  };
-
-  const handleScoreSelect = (score: number | null) => {
-    setLocalSettings(prev => ({
-      ...prev,
-      finalScore: score
-    }));
-  };
-
-  const handleTeamColorChange = (team: 'home' | 'away', color: string) => {
+  const handleTeamSelect = (team: 'home' | 'away', preset: typeof TEAM_PRESETS[0]) => {
     setLocalSettings(prev => ({
       ...prev,
       [team === 'home' ? 'homeTeam' : 'awayTeam']: {
         ...prev[team === 'home' ? 'homeTeam' : 'awayTeam'],
-        color
+        name: preset.name,
+        color: preset.color
       }
     }));
   };
@@ -73,55 +60,12 @@ export default function GameSettings({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800 rounded-2xl p-8 w-full max-w-2xl"
+        className="bg-gray-800 rounded-2xl p-8 w-full max-w-7xl"
       >
         <h2 className="text-3xl font-bold text-white mb-8 text-center">Game Settings</h2>
         
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Game Duration */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-white">Game Duration</h3>
-            <div className="grid grid-cols-3 gap-4">
-              {TIME_PRESETS.map(preset => (
-                <button
-                  key={preset.value}
-                  type="button"
-                  onClick={() => handleTimeSelect(preset.value)}
-                  className={`p-4 rounded-xl text-center transition-all ${
-                    localSettings.timeLength === preset.value
-                      ? 'bg-cyan-500 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Target Score */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-white">Target Score</h3>
-            <div className="grid grid-cols-3 gap-4">
-              {SCORE_PRESETS.map(preset => (
-                <button
-                  key={preset.value}
-                  type="button"
-                  onClick={() => handleScoreSelect(preset.value)}
-                  className={`p-4 rounded-xl text-center transition-all ${
-                    localSettings.finalScore === preset.value
-                      ? 'bg-cyan-500 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Team Settings */}
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-[1fr_auto_1fr] gap-8">
             {/* Home Team */}
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-white">Home Team</h3>
@@ -136,23 +80,25 @@ export default function GameSettings({
                 className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
               <div className="space-y-2">
-                <label className="text-sm text-gray-300">Team Color</label>
+                <label className="text-sm text-gray-300">Select Team</label>
                 <div className="grid grid-cols-4 gap-2">
-                  {TEAM_COLORS.map(color => (
+                  {TEAM_PRESETS.map(preset => (
                     <button
-                      key={color.value}
+                      key={preset.id}
                       type="button"
-                      onClick={() => handleTeamColorChange('home', color.value)}
-                      className={`h-12 rounded-lg transition-all ${
-                        localSettings.homeTeam.color === color.value
-                          ? 'ring-4 ring-white scale-110'
+                      onClick={() => handleTeamSelect('home', preset)}
+                      className={`aspect-square rounded-lg transition-all overflow-hidden relative ${
+                        localSettings.homeTeam.color === preset.color
+                          ? 'ring-4 ring-white scale-105'
                           : 'hover:scale-105'
                       }`}
-                      style={{ backgroundColor: color.value }}
+                      style={{ backgroundColor: preset.color }}
                     >
-                      {localSettings.homeTeam.color === color.value && (
-                        <div className="w-2 h-2 bg-white rounded-full mx-auto" />
-                      )}
+                      <img 
+                        src={preset.logo} 
+                        alt={preset.name}
+                        className="w-full h-full object-contain p-2"
+                      />
                     </button>
                   ))}
                 </div>
@@ -175,7 +121,13 @@ export default function GameSettings({
                       key={player.id}
                       className="flex items-center justify-between p-2 bg-gray-700 rounded-lg"
                     >
-                      <span className="text-gray-200">{player.name}</span>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-4 h-4 rounded-full" 
+                          style={{ backgroundColor: player.color }}
+                        />
+                        <span className="text-gray-200">{player.name}</span>
+                      </div>
                       <button
                         type="button"
                         onClick={() => {
@@ -197,6 +149,51 @@ export default function GameSettings({
               </div>
             </div>
 
+            {/* Game Settings */}
+            <div className="space-y-6 self-start">
+              {/* Game Duration */}
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-white text-center">Game Duration</h3>
+                <div className="flex flex-col gap-2">
+                  {TIME_PRESETS.map(preset => (
+                    <button
+                      key={preset.value}
+                      type="button"
+                      onClick={() => setLocalSettings(prev => ({ ...prev, timeLength: preset.value }))}
+                      className={`px-4 py-2 rounded-lg text-center transition-all ${
+                        localSettings.timeLength === preset.value
+                          ? 'bg-cyan-500 text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Target Score */}
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-white text-center">Target Score</h3>
+                <div className="flex flex-col gap-2">
+                  {SCORE_PRESETS.map(preset => (
+                    <button
+                      key={preset.value}
+                      type="button"
+                      onClick={() => setLocalSettings(prev => ({ ...prev, finalScore: preset.value }))}
+                      className={`px-4 py-2 rounded-lg text-center transition-all ${
+                        localSettings.finalScore === preset.value
+                          ? 'bg-cyan-500 text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* Away Team */}
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-white">Away Team</h3>
@@ -211,23 +208,25 @@ export default function GameSettings({
                 className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
               <div className="space-y-2">
-                <label className="text-sm text-gray-300">Team Color</label>
+                <label className="text-sm text-gray-300">Select Team</label>
                 <div className="grid grid-cols-4 gap-2">
-                  {TEAM_COLORS.map(color => (
+                  {TEAM_PRESETS.map(preset => (
                     <button
-                      key={color.value}
+                      key={preset.id}
                       type="button"
-                      onClick={() => handleTeamColorChange('away', color.value)}
-                      className={`h-12 rounded-lg transition-all ${
-                        localSettings.awayTeam.color === color.value
-                          ? 'ring-4 ring-white scale-110'
+                      onClick={() => handleTeamSelect('away', preset)}
+                      className={`aspect-square rounded-lg transition-all overflow-hidden relative ${
+                        localSettings.awayTeam.color === preset.color
+                          ? 'ring-4 ring-white scale-105'
                           : 'hover:scale-105'
                       }`}
-                      style={{ backgroundColor: color.value }}
+                      style={{ backgroundColor: preset.color }}
                     >
-                      {localSettings.awayTeam.color === color.value && (
-                        <div className="w-2 h-2 bg-white rounded-full mx-auto" />
-                      )}
+                      <img 
+                        src={preset.logo} 
+                        alt={preset.name}
+                        className="w-full h-full object-contain p-2"
+                      />
                     </button>
                   ))}
                 </div>
@@ -250,7 +249,13 @@ export default function GameSettings({
                       key={player.id}
                       className="flex items-center justify-between p-2 bg-gray-700 rounded-lg"
                     >
-                      <span className="text-gray-200">{player.name}</span>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-4 h-4 rounded-full" 
+                          style={{ backgroundColor: player.color }}
+                        />
+                        <span className="text-gray-200">{player.name}</span>
+                      </div>
                       <button
                         type="button"
                         onClick={() => {

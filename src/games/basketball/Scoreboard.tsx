@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BasketballTeam } from './types';
+import { BasketballTeam, TEAM_PRESETS, TeamPreset } from './types';
 import { useNavigate } from 'react-router-dom';
 
 interface ScoreboardProps {
@@ -93,24 +93,19 @@ export default function Scoreboard({
 
         {/* Main Score and Timer Section */}
         <div className="flex justify-between items-center gap-8">
-          {/* Home Score Circle */}
-          <div className="relative">
-            <div className="w-80 h-80 rounded-full bg-gray-800 flex items-center justify-center">
-              <motion.div
-                key={homeTeam.score}
-                initial={{ scale: 1.2 }}
-                animate={{ scale: 1 }}
-                className="text-[8rem] font-bold tabular-nums"
-                style={{ color: homeTeam.color, fontFamily: "'Wallpoet', monospace" }}
-              >
-                {/* Score display */}
-                <div className="font-['Wallpoet'] text-[8rem] mb-4" style={{ color: homeTeam.color }}>
-                  {String(homeTeam.score).padStart(2, '0')}
-                </div>
-              </motion.div>
+          {/* Home Team */}
+          <div className="flex flex-col items-center">
+            <img 
+              src={TEAM_PRESETS.find(t => t.color === homeTeam.color)?.logo} 
+              alt={homeTeam.name}
+              className="w-24 h-24 object-contain mb-2"
+            />
+            <h2 className="text-4xl font-bold text-white mb-4">{homeTeam.name}</h2>
+            <div className="text-[8rem] font-['Wallpoet'] text-white leading-none">
+              {String(homeTeam.score).padStart(2, '0')}
             </div>
             {/* Point Buttons */}
-            <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 flex gap-2">
+            <div className="mt-8 space-y-4">
               <button
                 onClick={() => onAddPoints('home', -1)}
                 className="bg-gray-700 text-white w-14 h-14 rounded-full hover:bg-gray-600 text-xl"
@@ -138,8 +133,8 @@ export default function Scoreboard({
             </div>
           </div>
 
-          {/* Center Timer Section */}
-          <div className="text-center flex-1">
+          {/* Timer and Game Info */}
+          <div className="flex flex-col items-center">
             <div className="text-2xl text-gray-400 mb-2">PERIOD 2</div>
             <motion.div
               key={timeRemaining}
@@ -177,24 +172,19 @@ export default function Scoreboard({
             </div>
           </div>
 
-          {/* Away Score Circle */}
-          <div className="relative">
-            <div className="w-80 h-80 rounded-full bg-gray-800 flex items-center justify-center">
-              <motion.div
-                key={awayTeam.score}
-                initial={{ scale: 1.2 }}
-                animate={{ scale: 1 }}
-                className="text-[8rem] font-bold tabular-nums"
-                style={{ color: awayTeam.color, fontFamily: "'Wallpoet', monospace" }}
-              >
-                {/* Away team score display */}
-                <div className="font-['Wallpoet'] text-[8rem] mb-4" style={{ color: awayTeam.color }}>
-                  {String(awayTeam.score).padStart(2, '0')}
-                </div>
-              </motion.div>
+          {/* Away Team */}
+          <div className="flex flex-col items-center">
+            <img 
+              src={TEAM_PRESETS.find(t => t.color === awayTeam.color)?.logo} 
+              alt={awayTeam.name}
+              className="w-24 h-24 object-contain mb-2"
+            />
+            <h2 className="text-4xl font-bold text-white mb-4">{awayTeam.name}</h2>
+            <div className="text-[8rem] font-['Wallpoet'] text-white leading-none">
+              {String(awayTeam.score).padStart(2, '0')}
             </div>
             {/* Point Buttons */}
-            <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 flex gap-2">
+            <div className="mt-8 space-y-4">
               <button
                 onClick={() => onAddPoints('away', -1)}
                 className="bg-gray-700 text-white w-14 h-14 rounded-full hover:bg-gray-600 text-xl"
