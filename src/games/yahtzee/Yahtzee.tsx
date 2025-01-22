@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useYahtzeeGame } from './YahtzeeContext';
-import { YahtzeePlayer, YahtzeeCategory } from '../../types/yahtzee';
+import { YahtzeePlayer, YahtzeeCategory } from './types';
 import { YAHTZEE_CATEGORIES } from './yahtzeeConfig';
 import PlayerSelectionModal from '../../components/PlayerSelectionModal';
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal';
+import { useNavigate } from 'react-router-dom';
 
 // Player Management Component
 interface PlayerManagementProps {
@@ -224,7 +225,7 @@ function ScoreGrid({
     return (
       <td
         key={`${playerId}-${category}`}
-        className={`
+        className={`block
           p-3 border dark:border-scoreboard-dark-primary text-center cursor-pointer transition-all
           ${hasScore ? 'bg-gray-200 dark:bg-scoreboard-dark-bg/70' : 'hover:bg-scoreboard-dark-surface/10'}
           text-lg font-cyber
@@ -295,215 +296,176 @@ function ScoreGrid({
   };
 
   return (
-    <div className="overflow-x-auto mb-8 max-h-[calc(100vh-20rem)] overflow-y-auto">
-      <table className="w-full bg-white dark:bg-scoreboard-dark-surface rounded-lg shadow-lg text-lg">
-        <thead className="sticky top-0 bg-white dark:bg-scoreboard-dark-surface z-10">
-          <tr className="border-b-2 dark:border-gray-700">
-            <th className="p-4 text-left font-cyber text-xl text-black dark:text-white min-w-[200px]">
-              <div className="flex justify-between items-center">
-                <span>Category</span>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-cyber text-gray-600 dark:text-gray-400">
-                    {calculateTurnsRemaining()} turns left
-                  </span>
-                  <div className="w-24 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+    <div className="relative h-full flex flex-col bg-white text-gray-800">
+      <div className="overflow-auto flex-grow">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="w-8 border-b border-gray-300"></th>
+              <th className="w-full border-b border-gray-300"></th>
+              {players.map(player => (
+                <th 
+                  key={player.id}
+                  className="p-2 text-center cursor-pointer hover:bg-gray-50 w-24 border-b border-gray-300"
+                  onClick={() => onEditPlayer(player)}
+                >
+                  <div className="flex flex-col items-center group">
                     <div 
-                      className="h-full bg-scoreboard-light-sky dark:bg-scoreboard-dark-primary rounded-full transition-all duration-500"
-                      style={{ 
-                        width: `${100 - (calculateTurnsRemaining() / (13 * players.length)) * 100}%` 
-                      }}
+                      className="w-6 h-6 rounded-full mb-1 group-hover:ring-2 group-hover:ring-gray-800 group-hover:ring-offset-2 transition-all"
+                      style={{ backgroundColor: player.color }}
                     />
+                    <span className="font-mono text-sm text-gray-800 group-hover:text-gray-600 truncate max-w-[80px]">
+                      {player.name}
+                    </span>
                   </div>
-                </div>
-              </div>
-            </th>
-            {players.map(player => (
-              <th 
-                key={player.id}
-                className="p-4 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-scoreboard-dark-bg min-w-[120px]"
-                onClick={() => onEditPlayer(player)}
-              >
-                <div className="flex flex-col items-center group">
-                  <div 
-                    className="w-6 h-6 rounded-full mb-2 group-hover:ring-2 group-hover:ring-scoreboard-dark-primary group-hover:ring-offset-2 transition-all shadow-lg"
-                    style={{ backgroundColor: player.color }}
-                  />
-                  <span className="font-cyber text-lg text-black dark:text-white group-hover:text-scoreboard-dark-primary">
-                    {player.name}
-                  </span>
-                </div>
+                </th>
+              ))}
+              <th className="p-2 w-12 border-b border-gray-300">
+                <button
+                  onClick={onAddPlayer}
+                  className="w-8 h-8 rounded-full bg-gray-800 text-white font-bold text-lg hover:bg-gray-700 transition-colors"
+                >
+                  +
+                </button>
               </th>
-            ))}
-            <th className="p-4 w-16">
-              <button
-                onClick={onAddPlayer}
-                className="w-10 h-10 rounded-full bg-scoreboard-light-sky dark:bg-scoreboard-dark-primary text-white font-bold text-xl hover:bg-opacity-90 shadow-lg"
-              >
-                +
-              </button>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {/* Upper Section Header */}
-          <tr className="bg-gray-100 dark:bg-scoreboard-dark-bg/50">
-            <td colSpan={players.length + 1} className="p-2 font-cyber font-bold text-lg text-gray-800 dark:text-gray-100">
-              Upper Section
-            </td>
-          </tr>
-
-          {/* Upper Section */}
-          {['ones', 'twos', 'threes', 'fours', 'fives', 'sixes'].map(category => (
-            <tr key={category}>
-              <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="text-gray-800 dark:text-gray-100">
-                      {YAHTZEE_CATEGORIES[category].name}
-                    </span>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                      {YAHTZEE_CATEGORIES[category].description}
+            </tr>
+          </thead>
+          <tbody>
+            {/* Upper Section */}
+            <tr>
+              <td rowSpan={8} className="border-r border-gray-300 font-mono font-bold text-sm text-gray-800 text-center align-middle w-8 [writing-mode:vertical-lr] rotate-180">
+                Upper Section
+              </td>
+            </tr>
+            {['ones', 'twos', 'threes', 'fours', 'fives', 'sixes'].map((category) => (
+              <tr key={category} className="border-b border-gray-300 hover:bg-gray-50">
+                <td className="p-3 font-mono">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="text-gray-800">
+                        {YAHTZEE_CATEGORIES[category].name}
+                      </span>
+                      <div className="text-sm text-gray-600">
+                        {YAHTZEE_CATEGORIES[category].description}
+                      </div>
+                    </div>
+                    <div className="text-sm font-bold text-gray-800">
+                      {YAHTZEE_CATEGORIES[category].maxScore} pts
                     </div>
                   </div>
-                  <div className="text-sm font-bold text-gray-700 dark:text-scoreboard-dark-primary">
-                    {YAHTZEE_CATEGORIES[category].maxScore} pts
-                  </div>
-                </div>
-              </td>
-              {players.map(player => renderScoreCell(player.id, category as YahtzeeCategory))}
-            </tr>
-          ))}
-
-          {/* Upper Section Subtotal */}
-          <tr className="bg-gray-50 dark:bg-scoreboard-dark-bg/50">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold text-black dark:text-white">
-              Upper Section Subtotal
-            </td>
-            {players.map(player => (
-              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber text-black dark:text-white">
-                {calculateUpperSubtotal(player.id)}
-              </td>
-            ))}
-          </tr>
-
-          {/* Bonus Row */}
-          <tr className="bg-green-50 dark:bg-green-900/30">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber text-black dark:text-white">
-              <div className="flex justify-between items-center">
-                <div>
-                  <span className="font-bold">Bonus</span>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">
-                    Score 63+ to get 35 points bonus
-                  </div>
-                </div>
-                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">35 pts</div>
-              </div>
-            </td>
-            {players.map(player => {
-              const upperTotal = calculateUpperSubtotal(player.id);
-              const pointsNeeded = Math.max(0, 63 - upperTotal);
-              const hasBonus = upperTotal >= 63;
-              
-              return (
-                <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber">
-                  {hasBonus ? (
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">35</span>
-                  ) : (
-                    <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
-                      {pointsNeeded} needed
-                    </span>
-                  )}
                 </td>
-              );
-            })}
-          </tr>
-
-          {/* Upper Section Total */}
-          <tr className="bg-gray-100 dark:bg-scoreboard-dark-bg/70">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold text-black dark:text-white">
-              Upper Section Total
-            </td>
-            {players.map(player => (
-              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber font-bold text-black dark:text-white">
-                {calculateUpperSubtotal(player.id) + getUpperBonus(player.id)}
-              </td>
+                {players.map(player => (
+                  <td key={player.id} className="p-2 flex-row justify-center font-mono w-24">
+                    {renderScoreCell(player.id, category as YahtzeeCategory)}
+                  </td>
+                ))}
+              </tr>
             ))}
-          </tr>
 
-          {/* Lower Section Header */}
-          <tr className="bg-gray-100 dark:bg-scoreboard-dark-bg/50">
-            <td colSpan={players.length + 1} className="p-2 font-cyber font-bold text-lg text-gray-800 dark:text-gray-100">
-              Lower Section
-            </td>
-          </tr>
-
-          {/* Lower Section */}
-          {['threeOfAKind', 'fourOfAKind', 'fullHouse', 'smallStraight', 'largeStraight', 'yahtzee', 'chance'].map(category => (
-            <tr key={category}>
-              <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber">
+            {/* Bonus Row */}
+            <tr className="bg-gray-50 border-b border-gray-300">
+              <td className="p-3 font-mono">
                 <div className="flex justify-between items-center">
                   <div>
-                    <span className="text-gray-800 dark:text-gray-100">
-                      {YAHTZEE_CATEGORIES[category].name}
-                    </span>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                      {YAHTZEE_CATEGORIES[category].description}
+                    <span className="font-bold text-gray-800">Bonus</span>
+                    <div className="text-sm text-gray-600">
+                      Score 63+ to get 35 points bonus
                     </div>
                   </div>
-                  <div className="text-sm font-bold text-gray-700 dark:text-scoreboard-dark-primary">
-                    {YAHTZEE_CATEGORIES[category].maxScore} pts
-                  </div>
+                  <div className="text-sm font-bold text-gray-800">35 pts</div>
                 </div>
               </td>
-              {players.map(player => renderScoreCell(player.id, category as YahtzeeCategory))}
+              {players.map(player => {
+                const upperTotal = calculateUpperSubtotal(player.id);
+                const pointsNeeded = Math.max(0, 63 - upperTotal);
+                const hasBonus = upperTotal >= 63;
+                
+                return (
+                  <td key={player.id} className="p-2 text-center font-mono w-24">
+                    {hasBonus ? (
+                      <span className="text-green-600 font-bold">35</span>
+                    ) : (
+                      <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-800 bg-red-100 rounded-full border border-red-200">
+                        {pointsNeeded} needed
+                      </span>
+                    )}
+                  </td>
+                );
+              })}
             </tr>
-          ))}
 
-          {/* Lower Section Subtotal */}
-          <tr className="bg-gray-50 dark:bg-scoreboard-dark-bg/50">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold text-black dark:text-white">
-              Lower Section Total
-            </td>
-            {players.map(player => (
-              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber font-bold text-black dark:text-white">
-                {calculateLowerSubtotal(player.id)}
+            {/* Lower Section */}
+            <tr>
+              <td rowSpan={8} className="border-r border-gray-300 font-mono font-bold text-sm text-gray-800 text-center align-middle w-8 [writing-mode:vertical-lr] rotate-180">
+                Lower Section
               </td>
+            </tr>
+            {['threeOfAKind', 'fourOfAKind', 'fullHouse', 'smallStraight', 'largeStraight', 'yahtzee', 'chance'].map((category) => (
+              <tr key={category} className="border-b border-gray-300 hover:bg-gray-50">
+                <td className="p-3 font-mono">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="text-gray-800">
+                        {YAHTZEE_CATEGORIES[category].name}
+                      </span>
+                      <div className="text-sm text-gray-600">
+                        {YAHTZEE_CATEGORIES[category].description}
+                      </div>
+                    </div>
+                    <div className="text-sm font-bold text-gray-800">
+                      {YAHTZEE_CATEGORIES[category].maxScore} pts
+                    </div>
+                  </div>
+                </td>
+                {players.map(player => (
+                  <td key={player.id} className="p-2 flex-row justify-center font-mono w-24">
+                    {renderScoreCell(player.id, category as YahtzeeCategory)}
+                  </td>
+                ))}
+                <td className="w-12"></td>
+              </tr>
             ))}
-          </tr>
 
-          {/* Grand Total Section */}
-          <tr className="bg-scoreboard-dark-primary/10 dark:bg-scoreboard-dark-primary/30">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold text-black dark:text-white">
-              Upper Section Total
-            </td>
-            {players.map(player => (
-              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber font-bold text-black dark:text-white">
-                {calculateUpperSubtotal(player.id) + getUpperBonus(player.id)}
+            {/* Totals Section */}
+            <tr>
+              <td rowSpan={3} className="border-r border-gray-300 font-mono font-bold text-sm text-gray-800 text-center align-middle w-8 [writing-mode:vertical-lr] rotate-180">
+                Totals
               </td>
-            ))}
-          </tr>
-          <tr className="bg-scoreboard-dark-primary/10 dark:bg-scoreboard-dark-primary/30">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold text-black dark:text-white">
-              Lower Section Total
-            </td>
-            {players.map(player => (
-              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber font-bold text-black dark:text-white">
-                {calculateLowerSubtotal(player.id)}
+              <td className="p-3 font-mono font-bold text-gray-800">
+                Upper Section Total (with bonus)
               </td>
-            ))}
-          </tr>
-          <tr className="bg-scoreboard-dark-primary/20 dark:bg-scoreboard-dark-primary/50 font-bold text-lg">
-            <td className="p-2 border dark:border-scoreboard-dark-primary font-cyber font-bold text-black dark:text-white">
-              Grand Total
-            </td>
-            {players.map(player => (
-              <td key={player.id} className="p-2 border dark:border-scoreboard-dark-primary text-center font-cyber font-bold text-black dark:text-white">
-                {calculateTotal(player.id)}
+              {players.map(player => (
+                <td key={player.id} className="p-2 text-center font-mono font-bold text-gray-800 w-24">
+                  {calculateUpperSubtotal(player.id) + getUpperBonus(player.id)}
+                </td>
+              ))}
+              <td className="w-12"></td>
+            </tr>
+            <tr>
+              <td className="p-3 font-mono font-bold text-gray-800">
+                Lower Section Total
               </td>
-            ))}
-          </tr>
-        </tbody>
-      </table>
+              {players.map(player => (
+                <td key={player.id} className="p-2 text-center font-mono font-bold text-gray-800 w-24">
+                  {calculateLowerSubtotal(player.id)}
+                </td>
+              ))}
+              <td className="w-12"></td>
+            </tr>
+            <tr className="border-t-2 border-gray-300">
+              <td className="p-3 font-mono font-bold text-xl text-gray-800">
+                Grand Total
+              </td>
+              {players.map(player => (
+                <td key={player.id} className="p-2 text-center font-mono font-bold text-xl text-gray-800 w-24">
+                  {calculateTotal(player.id)}
+                </td>
+              ))}
+              <td className="w-12"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -677,13 +639,14 @@ function Summary({ players, scores }: SummaryProps) {
 }
 
 // Main Game Component
-function Yahtzee() {
+export default function Yahtzee() {
   const { state, dispatch } = useYahtzeeGame();
   const [showPlayerModal, setShowPlayerModal] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<YahtzeePlayer | null>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [playerToDelete, setPlayerToDelete] = useState<YahtzeePlayer | null>(null);
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
+  const navigate = useNavigate();
 
   // Autosave whenever state changes
   useEffect(() => {
@@ -773,75 +736,89 @@ function Yahtzee() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex justify-between items-center">
-        <h1 className="font-display dark:font-cyber text-4xl text-scoreboard-light-tree dark:text-scoreboard-dark-primary">
-          Yahtzee Scorecard
-        </h1>
-        <div className="flex items-center space-x-4">
-          {!state.gameStarted && state.players.length >= 2 && (
-            <button
-              onClick={() => dispatch({ type: 'START_GAME' })}
-              className="px-6 py-3 font-cyber bg-scoreboard-light-sky dark:bg-scoreboard-dark-primary text-white rounded-lg hover:bg-opacity-90"
-            >
-              Start Game
-            </button>
+    <div className="fixed inset-0 bg-gray-900 flex items-center justify-center">
+      <div className="w-full p-8">
+        {/* Exit Button */}
+        <button
+          onClick={() => navigate('/')}
+          className="absolute top-4 right-4 bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+          Exit Game
+        </button>
+
+        {/* Scoreboard */}
+        <div className="mt-8">
+          <div className="mb-8 flex justify-between items-center">
+            <h1 className="font-display dark:font-cyber text-4xl text-scoreboard-light-tree dark:text-scoreboard-dark-primary">
+              Yahtzee Scorecard
+            </h1>
+            <div className="flex items-center space-x-4">
+              {!state.gameStarted && state.players.length >= 2 && (
+                <button
+                  onClick={() => dispatch({ type: 'START_GAME' })}
+                  className="px-6 py-3 font-cyber bg-scoreboard-light-sky dark:bg-scoreboard-dark-primary text-white rounded-lg hover:bg-opacity-90"
+                >
+                  Start Game
+                </button>
+              )}
+              {state.gameStarted && (
+                <button
+                  onClick={handleResetGame}
+                  className="px-6 py-3 font-cyber border-2 border-red-500 dark:border-red-400 text-red-500 dark:text-red-400 rounded-lg hover:bg-red-500/10 dark:hover:bg-red-400/10"
+                >
+                  Reset Game
+                </button>
+              )}
+            </div>
+          </div>
+
+          <ScoreGrid
+            players={state.players}
+            scores={state.scores}
+            onScoreSelect={handleScoreSelect}
+            onAddPlayer={handleAddPlayer}
+            onEditPlayer={handleEditPlayer}
+          />
+
+          {showPlayerModal && (
+            <PlayerSelectionModal
+              onSelect={handlePlayerSelect}
+              onClose={() => {
+                setShowPlayerModal(false);
+                setEditingPlayer(null);
+              }}
+              excludePlayerIds={editingPlayer ? state.players.filter(p => p.id !== editingPlayer.id).map(p => p.id) : state.players.map(p => p.id)}
+              title={editingPlayer ? 'Edit Player' : 'Add Player to Game'}
+              editingPlayer={editingPlayer}
+              onDelete={handleDeletePlayer}
+            />
           )}
-          {state.gameStarted && (
-            <button
-              onClick={handleResetGame}
-              className="px-6 py-3 font-cyber border-2 border-red-500 dark:border-red-400 text-red-500 dark:text-red-400 rounded-lg hover:bg-red-500/10 dark:hover:bg-red-400/10"
-            >
-              Reset Game
-            </button>
+
+          {showDeleteConfirmation && playerToDelete && (
+            <DeleteConfirmationModal
+              title="Delete Player"
+              message={`Are you sure you want to remove ${playerToDelete.name} from the game? This action cannot be undone.`}
+              onConfirm={confirmDeletePlayer}
+              onCancel={() => {
+                setShowDeleteConfirmation(false);
+                setPlayerToDelete(null);
+              }}
+            />
+          )}
+
+          {showResetConfirmation && (
+            <DeleteConfirmationModal
+              title="Reset Game"
+              message="Are you sure you want to reset the game? All scores will be cleared, but players will remain. This action cannot be undone."
+              onConfirm={confirmResetGame}
+              onCancel={() => setShowResetConfirmation(false)}
+            />
           )}
         </div>
       </div>
-
-      <ScoreGrid
-        players={state.players}
-        scores={state.scores}
-        onScoreSelect={handleScoreSelect}
-        onAddPlayer={handleAddPlayer}
-        onEditPlayer={handleEditPlayer}
-      />
-
-      {showPlayerModal && (
-        <PlayerSelectionModal
-          onSelect={handlePlayerSelect}
-          onClose={() => {
-            setShowPlayerModal(false);
-            setEditingPlayer(null);
-          }}
-          excludePlayerIds={editingPlayer ? state.players.filter(p => p.id !== editingPlayer.id).map(p => p.id) : state.players.map(p => p.id)}
-          title={editingPlayer ? 'Edit Player' : 'Add Player to Game'}
-          editingPlayer={editingPlayer}
-          onDelete={handleDeletePlayer}
-        />
-      )}
-
-      {showDeleteConfirmation && playerToDelete && (
-        <DeleteConfirmationModal
-          title="Delete Player"
-          message={`Are you sure you want to remove ${playerToDelete.name} from the game? This action cannot be undone.`}
-          onConfirm={confirmDeletePlayer}
-          onCancel={() => {
-            setShowDeleteConfirmation(false);
-            setPlayerToDelete(null);
-          }}
-        />
-      )}
-
-      {showResetConfirmation && (
-        <DeleteConfirmationModal
-          title="Reset Game"
-          message="Are you sure you want to reset the game? All scores will be cleared, but players will remain. This action cannot be undone."
-          onConfirm={confirmResetGame}
-          onCancel={() => setShowResetConfirmation(false)}
-        />
-      )}
     </div>
   );
-}
-
-export default Yahtzee; 
+} 

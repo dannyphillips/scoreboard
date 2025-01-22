@@ -53,12 +53,12 @@ export default function GameDetails() {
 
   if (!game) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-white mb-4">Game not found</h1>
+          <h2 className="text-2xl font-bold text-white mb-4">Game not found</h2>
           <button
             onClick={() => navigate('/')}
-            className="px-6 py-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600"
+            className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-3 rounded-xl font-semibold"
           >
             Return Home
           </button>
@@ -68,69 +68,46 @@ export default function GameDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800 rounded-2xl overflow-hidden"
-        >
-          {/* Hero Image */}
-          <div className="relative h-48 md:h-64 bg-gradient-to-r from-cyan-500 to-blue-500">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <h1 className="text-4xl md:text-5xl font-bold text-white text-center px-4">
-                {game.name}
-              </h1>
-            </div>
+    <div className="min-h-screen bg-gray-900 p-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Left Column - Cover Photo */}
+        <div className="relative">
+          <img
+            src={game.image}
+            alt={game.name}
+            className="w-full h-[500px] object-cover rounded-xl"
+          />
+          <button
+            onClick={() => navigate(`/games/${gameId}/play`)}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-cyan-500 hover:bg-cyan-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-colors"
+          >
+            Start Playing
+          </button>
+        </div>
+
+        {/* Right Column - Game Info */}
+        <div className="text-white">
+          <h1 className="text-4xl font-bold mb-4">{game.name}</h1>
+          <p className="text-gray-300 text-lg mb-8">{game.description}</p>
+          
+          <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Rules</h2>
+            <ul className="list-disc list-inside space-y-2">
+              {game.rules.map((rule, index) => (
+                <li key={index} className="text-gray-300">{rule}</li>
+              ))}
+            </ul>
           </div>
 
-          {/* Content */}
-          <div className="p-6 md:p-8 space-y-6">
-            {/* Description */}
-            <div>
-              <p className="text-gray-300 text-lg">{game.description}</p>
-            </div>
-
-            {/* Rules and Features in Grid */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Rules */}
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-white">Rules</h2>
-                <ul className="space-y-2">
-                  {game.rules.map((rule, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-cyan-500 mr-2">•</span>
-                      <span className="text-gray-300">{rule}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Features */}
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-white">Features</h2>
-                <ul className="space-y-2">
-                  {game.features.map((feature, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-cyan-500 mr-2">•</span>
-                      <span className="text-gray-300">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* Start Button */}
-            <div className="flex justify-center pt-4">
-              <button
-                onClick={() => navigate(`/games/${game.id}/play`)}
-                className="px-8 py-4 bg-cyan-500 text-white text-xl font-semibold rounded-xl hover:bg-cyan-600 transition-colors"
-              >
-                Start Playing
-              </button>
-            </div>
+          <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6">
+            <h2 className="text-2xl font-semibold mb-4">Features</h2>
+            <ul className="list-disc list-inside space-y-2">
+              {game.features.map((feature, index) => (
+                <li key={index} className="text-gray-300">{feature}</li>
+              ))}
+            </ul>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

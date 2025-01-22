@@ -52,7 +52,7 @@ export const TEAM_PRESETS: TeamPreset[] = [
   { id: 'pink-poodles', name: 'Pink Poodles', color: '#F012BE', logo: '/src/assets/images/teams/pink-poodles.png' },
   { id: 'black-bears', name: 'Black Bears', color: '#111111', logo: '/src/assets/images/teams/black-bears.png' },
   { id: 'white-wolves', name: 'White Wolves', color: '#FFFFFF', logo: '/src/assets/images/teams/white-wolves.png' },
-  { id: 'gold-gorillas', name: 'Gold Gorillas', color: '#FFD700', logo: '/src/assets/images/teams/gold-gorillas.png' },
+  { id: 'gold-gorillas', name: 'Gold Gorillas', color: '#DAA520', logo: '/src/assets/images/teams/gold-gorillas.png' },
   { id: 'silver-sharks', name: 'Silver Sharks', color: '#C0C0C0', logo: '/src/assets/images/teams/silver-sharks.png' }
 ];
 
