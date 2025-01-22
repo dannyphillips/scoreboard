@@ -1,133 +1,137 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../services/firebase';
-import { Game } from '../types/index';
+import { Game } from '../games/types';
+
+const GAMES: Record<string, Game> = {
+  yahtzee: {
+    id: 'yahtzee',
+    name: 'Yahtzee',
+    description: 'A classic dice game of luck and strategy',
+    image: '/src/assets/images/yahtzee-hero.jpg',
+    rules: [
+      'Roll five dice up to three times per turn',
+      'Score points by matching specific combinations',
+      'Fill all categories to complete the game',
+      'Bonus points for scoring 63+ in the upper section',
+      'Yahtzee bonus for additional Yahtzees after the first'
+    ],
+    features: [
+      'Multiple players support',
+      'Automatic scoring calculation',
+      'Score history tracking',
+      'Player statistics',
+      'Dark mode support'
+    ]
+  },
+  basketball: {
+    id: 'basketball',
+    name: 'Basketball',
+    description: 'Track basketball game scores and stats',
+    image: '/src/assets/images/basketball-hero.jpg',
+    rules: [
+      'Add points for field goals, three-pointers, and free throws',
+      'Track fouls and timeouts',
+      'Manage player substitutions',
+      'Monitor game clock and shot clock',
+      'Record player statistics'
+    ],
+    features: [
+      'Real-time scoring',
+      'Player rotation management',
+      'Team statistics',
+      'Game clock with automatic timeouts',
+      'Dark mode support'
+    ]
+  }
+};
 
 function GameDetails() {
-  const { id } = useParams();
+  const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
-  const [game, setGame] = useState<Game | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const game = gameId ? GAMES[gameId] : null;
 
-  useEffect(() => {
-    async function fetchGame() {
-      if (!id) return;
-      
-      try {
-        const gameDoc = await getDoc(doc(db, 'games', id));
-        if (gameDoc.exists()) {
-          setGame({ id: gameDoc.id, ...gameDoc.data() } as Game);
-        } else {
-          setError('Game not found');
-        }
-      } catch (err) {
-        console.error('Error fetching game:', err);
-        setError('Failed to load game details');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchGame();
-  }, [id]);
-
-  const handleStartGame = () => {
-    navigate(`/games/${id}/play`);
-  };
-
-  if (loading) {
+  if (!game) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-xl font-cyber text-gray-600 dark:text-gray-400">
-          Loading game details...
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !game) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-xl font-cyber text-red-600">
-          {error || 'Game not found'}
-        </div>
+      <div className="text-center py-12">
+        <h1 className="text-2xl font-bold text-red-500">Game not found</h1>
+        <button
+          onClick={() => navigate('/')}
+          className="mt-4 px-6 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors duration-200 font-semibold"
+        >
+          Return Home
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto"
-      >
-        <div className="bg-white dark:bg-scoreboard-dark-surface rounded-2xl shadow-xl overflow-hidden">
-          <div className="relative h-64 md:h-96">
-            <img 
-              src={game.imageUrl}
-              alt={game.name}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <h1 className="absolute bottom-6 left-6 text-4xl md:text-6xl font-display dark:font-cyber text-white">
-              {game.name}
-            </h1>
-          </div>
-          
-          <div className="p-6 md:p-8">
-            <p className="text-lg md:text-xl font-body dark:font-cyber mb-8 text-gray-700 dark:text-gray-300">
-              {game.description}
-            </p>
-
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              <div className="bg-gray-50 dark:bg-scoreboard-dark-bg p-4 rounded-lg">
-                <h3 className="font-cyber text-lg mb-2 text-scoreboard-light-tree dark:text-scoreboard-dark-primary">
-                  Scoring
-                </h3>
-                <p className="font-body dark:font-cyber text-gray-600 dark:text-gray-400">
-                  {game.scoreType === 'points' ? 'Highest score wins.' : 'Lowest score wins.'} 
-                  {game.name === 'Yahtzee' && ' Includes upper section bonus and multiple Yahtzee bonuses.'}
-                </p>
-              </div>
-              <div className="bg-gray-50 dark:bg-scoreboard-dark-bg p-4 rounded-lg">
-                <h3 className="font-cyber text-lg mb-2 text-scoreboard-light-tree dark:text-scoreboard-dark-primary">
-                  Players
-                </h3>
-                <p className="font-body dark:font-cyber text-gray-600 dark:text-gray-400">
-                  2+ players. Take turns and compete for the {game.highScoreOrder === 'desc' ? 'highest' : 'lowest'} score!
-                </p>
-              </div>
-            </div>
-
-            <div className="flex justify-center">
-              <button
-                onClick={handleStartGame}
-                className="px-8 py-4 bg-scoreboard-light-sky dark:bg-scoreboard-dark-primary text-white font-cyber text-xl rounded-lg hover:bg-opacity-90 transform hover:scale-105 transition-all"
-              >
-                Start Playing
-              </button>
-            </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="max-w-4xl mx-auto"
+    >
+      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div className="relative h-80">
+          <img
+            src={game.image}
+            alt={game.name}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/70 flex items-center justify-center">
+            <h1 className="text-5xl font-bold text-white drop-shadow-lg">{game.name}</h1>
           </div>
         </div>
 
-        {/* High Scores Section */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="mt-8 bg-white dark:bg-scoreboard-dark-surface rounded-2xl shadow-xl p-6 md:p-8"
-        >
-          <h2 className="text-3xl font-display dark:font-cyber mb-6 text-scoreboard-light-tree dark:text-scoreboard-dark-primary">
-            High Scores
-          </h2>
-          {/* We'll implement the high scores table in a future update */}
-        </motion.div>
-      </motion.div>
-    </div>
+        <div className="p-8">
+          <p className="text-xl text-gray-700 dark:text-gray-300 mb-8 leading-relaxed">
+            {game.description}
+          </p>
+
+          <div className="mb-8 bg-gray-50 dark:bg-gray-900/50 p-6 rounded-lg">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white flex items-center">
+              <span className="w-2 h-8 bg-cyan-500 rounded mr-3"></span>
+              Rules
+            </h2>
+            <ul className="list-none space-y-3 text-gray-700 dark:text-gray-300">
+              {game.rules.map((rule, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="text-cyan-500 mr-2">•</span>
+                  {rule}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mb-12 bg-gray-50 dark:bg-gray-900/50 p-6 rounded-lg">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white flex items-center">
+              <span className="w-2 h-8 bg-cyan-500 rounded mr-3"></span>
+              Features
+            </h2>
+            <ul className="list-none space-y-3 text-gray-700 dark:text-gray-300">
+              {game.features.map((feature, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="text-cyan-500 mr-2">•</span>
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex justify-center">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate(`/games/${game.id}/play`)}
+              className="px-8 py-4 bg-cyan-500 text-white rounded-lg font-bold text-lg hover:bg-cyan-600 transition-all duration-200 shadow-lg hover:shadow-cyan-500/25"
+            >
+              Start Playing
+            </motion.button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
