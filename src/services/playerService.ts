@@ -80,14 +80,21 @@ export const getPlayerGameHistory = async (playerId: string): Promise<GameHistor
   return querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }) as GameHistory);
 };
 
-export const getPlayerStats = async (playerId: string): Promise<PlayerStats[]> => {
-  const q = query(
-    collection(db, PLAYER_STATS_COLLECTION),
-    where('playerId', '==', playerId)
-  );
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }) as PlayerStats);
-};
+export async function getPlayerStats(): Promise<PlayerStats[]> {
+  const querySnapshot = await getDocs(collection(db, 'playerStats'));
+  return querySnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      playerId: data.playerId,
+      gameId: data.gameId,
+      highScore: data.highScore,
+      gamesPlayed: data.gamesPlayed,
+      averageScore: data.averageScore,
+      lastPlayed: data.lastPlayed.toDate(),
+    } as PlayerStats;
+  });
+}
 
 export const updateGameHistory = async (history: Omit<GameHistory, 'id'>): Promise<void> => {
   const historyId = generateId();
