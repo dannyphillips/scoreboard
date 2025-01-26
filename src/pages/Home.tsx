@@ -8,7 +8,7 @@ const GAMES: Game[] = [
     id: 'yahtzee',
     name: 'Yahtzee',
     description: 'A classic dice game of luck and strategy',
-    image: '/src/assets/images/games/yahtzee-card.jpg',
+    image: '/images/games/yahtzee-card.jpg',
     rules: [
       'Roll five dice up to three times per turn',
       'Score points by matching specific combinations',
@@ -24,7 +24,7 @@ const GAMES: Game[] = [
     id: 'basketball',
     name: 'Basketball',
     description: 'Track basketball game scores and stats',
-    image: '/src/assets/images/games/basketball-card.jpg',
+    image: '/images/games/basketball-card.jpg',
     rules: [
       'Add points for field goals and free throws',
       'Track fouls and timeouts',

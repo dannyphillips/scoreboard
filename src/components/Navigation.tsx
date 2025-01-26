@@ -1,7 +1,5 @@
 import { Link } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
-import logoLight from '../assets/images/logo-light.png';
-import logoDark from '../assets/images/logo-dark.png';
 import { useTheme } from '../context/ThemeContext';
 
 function Navigation() {
@@ -13,7 +11,7 @@ function Navigation() {
         <div className="flex justify-between items-center">
           <Link to="/" className="flex items-center space-x-3">
             <img 
-              src={theme === 'light' ? logoLight : logoDark}
+              src={theme === 'light' ? '/images/logo-light.png' : '/images/logo-dark.png'}
               alt="Scoreboard" 
               className="w-14 h-14 drop-shadow-md dark:filter dark:drop-shadow-[0_0_8px_rgba(0,255,255,0.8)] dark:animate-pulse-slow"
             />

@@ -6,7 +6,7 @@ const GAMES: Record<string, Game> = {
     id: 'yahtzee',
     name: "Shake N' Score",
     description: 'A thrilling dice game where strategy meets luck',
-    image: '../src/assets/images/games/yahtzee-card.jpg',
+    image: '/images/games/yahtzee-card.jpg',
     rules: [
       'Roll five dice up to three times per turn',
       'Score points by matching specific combinations',
@@ -26,7 +26,7 @@ const GAMES: Record<string, Game> = {
     id: 'basketball',
     name: 'Basketball',
     description: 'Track basketball game scores and stats',
-    image: '../src/assets/images/games/basketball-card.jpg',
+    image: '/images/games/basketball-card.jpg',
     rules: [
       'Add points for field goals, three-pointers, and free throws',
       'Track fouls and timeouts',
