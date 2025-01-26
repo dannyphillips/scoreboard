@@ -11,7 +11,7 @@ import PlayerDetails from './pages/PlayerDetails';
 function App() {
   return (
     <ThemeProvider>
-      <Router>
+      <Router basename="/scoreboard">
         <div className="min-h-screen transition-colors duration-200 bg-scoreboard-light-bg dark:bg-scoreboard-dark-bg">
           <Navigation />
           <main className="container mx-auto px-4 py-8">

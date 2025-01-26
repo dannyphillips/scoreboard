@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import { GameProvider } from '../context/GameProvider';
+import GameProvider from '../context/GameProvider';
 import Yahtzee from '../games/yahtzee';
 import Basketball from '../games/basketball';
 
@@ -20,7 +20,7 @@ export default function Game() {
   const GameComponent = GAME_COMPONENTS[gameId.toLowerCase()];
 
   return (
-    <GameProvider gameType={gameId}>
+    <GameProvider gameId={gameId}>
       <GameComponent />
     </GameProvider>
   );

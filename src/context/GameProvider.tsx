@@ -3,17 +3,17 @@ import { YahtzeeGameProvider } from '../games/yahtzee/YahtzeeContext';
 import { BasketballGameProvider } from '../games/basketball/BasketballContext';
 
 interface GameProviderProps {
-  gameType: string;
+  gameId: string;
   children: React.ReactNode;
 }
 
-export function GameProvider({ gameType, children }: GameProviderProps) {
-  switch (gameType.toLowerCase()) {
+export default function GameProvider({ gameId, children }: GameProviderProps) {
+  switch (gameId.toLowerCase()) {
     case 'yahtzee':
       return <YahtzeeGameProvider>{children}</YahtzeeGameProvider>;
     case 'basketball':
       return <BasketballGameProvider>{children}</BasketballGameProvider>;
     default:
-      throw new Error(`Unsupported game type: ${gameType}`);
+      return <>{children}</>;
   }
 } 
