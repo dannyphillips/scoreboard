@@ -43,7 +43,7 @@ function Players() {
     setShowPlayerModal(true);
   };
 
-  const handleSavePlayer = async (player: Player) => {
+  const handleSavePlayer = async (_player: Player) => {
     await loadPlayers();
     setShowPlayerModal(false);
     setEditingPlayer(null);

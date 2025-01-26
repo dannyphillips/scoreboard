@@ -14,36 +14,38 @@ function PlayerDetails() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return;
-    loadPlayerData(id);
-  }, [id]);
-
-  const loadPlayerData = async (playerId: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const [playerData, history, stats] = await Promise.all([
-        getPlayer(playerId),
-        getPlayerGameHistory(playerId),
-        getPlayerStats(playerId)
-      ]);
-
-      if (!playerData) {
-        setError('Player not found');
-        return;
-      }
-
-      setPlayer(playerData);
-      setGameHistory(history);
-      setPlayerStats(stats);
-    } catch (error) {
-      console.error('Error loading player data:', error);
-      setError('Failed to load player data');
-    } finally {
+    if (!id) {
+      setError('No player ID provided');
       setLoading(false);
+      return;
     }
-  };
+
+    const loadPlayerData = async () => {
+      try {
+        setLoading(true);
+        const [playerData, history, stats] = await Promise.all([
+          getPlayer(id),
+          getPlayerGameHistory(id),
+          getPlayerStats()
+        ]);
+
+        if (playerData) {
+          setPlayer(playerData);
+          setGameHistory(history);
+          setPlayerStats(stats.filter(stat => stat.playerId === id));
+        } else {
+          setError('Player not found');
+        }
+      } catch (error) {
+        console.error('Error loading player:', error);
+        setError('Failed to load player data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPlayerData();
+  }, [id]);
 
   if (loading) {
     return (
@@ -96,7 +98,7 @@ function PlayerDetails() {
               {player.name}
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Member since {new Date(player.createdAt).toLocaleDateString()}
+              Member since {player.createdAt ? new Date(player.createdAt).toLocaleDateString() : 'Unknown'}
             </p>
           </div>
         </div>

@@ -1,11 +1,11 @@
-import { GameMode, ScoringAction } from '../../types/basketball';
+import { GameMode, ScoringAction, ScoringActionType } from '../../types';
 
 export const GAME_MODES: Record<GameMode, {
   name: string;
   description: string;
-  targetScore: number;
-  timeLimit: number | null; // in seconds, null for no time limit
-  winBy: number; // points needed to win by
+  targetScore: number | null;
+  timeLimit: number | null;
+  winBy: number;
   maxPlayers: number;
   allowSubstitutions: boolean;
 }> = {
@@ -15,7 +15,7 @@ export const GAME_MODES: Record<GameMode, {
     targetScore: 11,
     timeLimit: null,
     winBy: 2,
-    maxPlayers: 6, // 3v3
+    maxPlayers: 6,
     allowSubstitutions: true,
   },
   FIRST_TO_21: {
@@ -24,79 +24,74 @@ export const GAME_MODES: Record<GameMode, {
     targetScore: 21,
     timeLimit: null,
     winBy: 2,
-    maxPlayers: 10, // 5v5
+    maxPlayers: 10,
     allowSubstitutions: true,
   },
   TIMED_GAME: {
     name: '20 Minute Game',
     description: '20 minute game with running clock, highest score wins',
     targetScore: null,
-    timeLimit: 1200, // 20 minutes in seconds
+    timeLimit: 1200,
     winBy: 1,
-    maxPlayers: 10, // 5v5
+    maxPlayers: 10,
     allowSubstitutions: true,
   },
   TOURNAMENT: {
     name: 'Tournament Mode',
     description: '10 minute game or first to 21, win by 2',
     targetScore: 21,
-    timeLimit: 600, // 10 minutes in seconds
+    timeLimit: 600,
     winBy: 2,
-    maxPlayers: 10, // 5v5
+    maxPlayers: 10,
     allowSubstitutions: true,
   }
 };
 
-export const SCORING_ACTIONS: Record<ScoringAction, {
-  name: string;
-  points: number;
-  color: string; // Tailwind color class
-  icon: string; // Material icon name
-}> = {
+export const SCORING_ACTIONS: Record<ScoringActionType, ScoringAction> = {
   THREE_POINTER: {
-    name: '3-Pointer',
+    type: 'THREE_POINTER',
     points: 3,
     color: 'bg-emerald-500',
     icon: 'sports_basketball',
   },
   TWO_POINTER: {
-    name: '2-Pointer',
+    type: 'TWO_POINTER',
     points: 2,
     color: 'bg-sky-500',
     icon: 'sports_basketball',
   },
   FREE_THROW: {
-    name: 'Free Throw',
+    type: 'FREE_THROW',
     points: 1,
     color: 'bg-purple-500',
     icon: 'sports_basketball',
   },
   FOUL: {
-    name: 'Foul',
+    type: 'FOUL',
     points: 0,
     color: 'bg-red-500',
     icon: 'warning',
   },
   ASSIST: {
-    name: 'Assist',
+    type: 'ASSIST',
     points: 0,
     color: 'bg-amber-500',
     icon: 'handshake',
   },
   REBOUND: {
-    name: 'Rebound',
+    type: 'REBOUND',
     points: 0,
     color: 'bg-indigo-500',
     icon: 'replay',
   },
   BLOCK: {
-    name: 'Block',
+    type: 'BLOCK',
     points: 0,
     color: 'bg-rose-500',
     icon: 'block',
   },
   STEAL: {
-    name: 'Steal',
+    type: 'STEAL',
     points: 0,
     color: 'bg-lime-500',
     icon: 'back_hand',

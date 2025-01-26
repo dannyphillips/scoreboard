@@ -1,13 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { YahtzeePlayer, YahtzeeCategory } from '../../types/yahtzee';
+import { YahtzeePlayer, YahtzeeCategory, YahtzeeGameState } from '../../types';
 import { createPlayer, updatePlayer, deletePlayer, getPlayer, updateGameHistory } from '../../services/playerService';
-
-interface YahtzeeGameState {
-  players: YahtzeePlayer[];
-  scores: Record<string, Record<YahtzeeCategory, number>>;
-  currentTurn: number;
-  gameStarted: boolean;
-}
 
 type YahtzeeAction =
   | { type: 'ADD_PLAYER'; player: YahtzeePlayer }
@@ -25,6 +18,8 @@ const initialState: YahtzeeGameState = {
   scores: {},
   currentTurn: 0,
   gameStarted: false,
+  isGameOver: false,
+  dice: [1, 1, 1, 1, 1],
 };
 
 // Initialize an empty score record for a player

@@ -1,22 +1,27 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { GameState, GameMode, Team, BasketballPlayer, ScoringAction, GameEvent } from '../../types/basketball';
-import { GAME_MODES, SCORING_ACTIONS } from './basketballConfig';
+import { GameState, GameMode, TeamSide, BasePlayer, GameEvent } from '../../types';
+import { GAME_MODES } from './basketballConfig';
 import { generateId } from '../../utils';
 
 // Initial state for a new game
 const initialState: GameState = {
   gameMode: 'FIRST_TO_21',
   timeRemaining: null,
-  gameStarted: false,
-  gamePaused: false,
+  isGameStarted: false,
+  isPaused: false,
+  isGameOver: false,
   homeTeam: {
+    id: 'home-team',
     name: 'Home Team',
+    color: '#FF4136',
     score: 0,
     timeouts: 2,
     players: [],
   },
   awayTeam: {
+    id: 'away-team',
     name: 'Away Team',
+    color: '#0074D9',
     score: 0,
     timeouts: 2,
     players: [],
@@ -34,13 +39,13 @@ type GameAction =
   | { type: 'RESUME_GAME' }
   | { type: 'RESET_GAME' }
   | { type: 'UPDATE_TIME'; time: number }
-  | { type: 'ADD_PLAYER'; team: Team; player: BasketballPlayer }
-  | { type: 'UPDATE_PLAYER'; team: Team; player: BasketballPlayer }
-  | { type: 'REMOVE_PLAYER'; team: Team; playerId: string }
-  | { type: 'TOGGLE_PLAYER_ACTIVE'; team: Team; playerId: string }
+  | { type: 'ADD_PLAYER'; team: TeamSide; player: BasePlayer }
+  | { type: 'UPDATE_PLAYER'; team: TeamSide; player: BasePlayer }
+  | { type: 'REMOVE_PLAYER'; team: TeamSide; playerId: string }
+  | { type: 'TOGGLE_PLAYER_ACTIVE'; team: TeamSide; playerId: string }
   | { type: 'RECORD_ACTION'; event: Omit<GameEvent, 'id' | 'timestamp'> }
   | { type: 'CHANGE_POSSESSION' }
-  | { type: 'USE_TIMEOUT'; team: Team }
+  | { type: 'USE_TIMEOUT'; team: TeamSide }
   | { type: 'NEXT_QUARTER' }
   | { type: 'LOAD_GAME'; state: GameState };
 
@@ -60,16 +65,16 @@ function basketballGameReducer(state: GameState, action: GameAction): GameState 
         gameMode: action.gameMode,
         timeRemaining: gameMode.timeLimit,
         shotClock: action.gameMode === 'TOURNAMENT' ? 24 : null,
-        gameStarted: true,
-        gamePaused: false,
+        isGameStarted: true,
+        isPaused: false,
       };
     }
 
     case 'PAUSE_GAME':
-      return { ...state, gamePaused: true };
+      return { ...state, isPaused: true };
 
     case 'RESUME_GAME':
-      return { ...state, gamePaused: false };
+      return { ...state, isPaused: false };
 
     case 'RESET_GAME':
       return {
@@ -113,7 +118,7 @@ function basketballGameReducer(state: GameState, action: GameAction): GameState 
         ...state,
         [team]: {
           ...state[team],
-          players: state[team].players.map(p =>
+          players: state[team].players.map((p: BasePlayer) =>
             p.id === action.player.id ? { ...p, ...action.player } : p
           ),
         },
@@ -126,7 +131,7 @@ function basketballGameReducer(state: GameState, action: GameAction): GameState 
         ...state,
         [team]: {
           ...state[team],
-          players: state[team].players.filter(p => p.id !== action.playerId),
+          players: state[team].players.filter((p: BasePlayer) => p.id !== action.playerId),
         },
       };
     }
@@ -137,7 +142,7 @@ function basketballGameReducer(state: GameState, action: GameAction): GameState 
         ...state,
         [team]: {
           ...state[team],
-          players: state[team].players.map(p =>
+          players: state[team].players.map((p: BasePlayer) =>
             p.id === action.playerId ? { ...p, isActive: !p.isActive } : p
           ),
         },
@@ -145,62 +150,16 @@ function basketballGameReducer(state: GameState, action: GameAction): GameState 
     }
 
     case 'RECORD_ACTION': {
-      const event: GameEvent = {
+      const newEvent: GameEvent = {
         id: generateId(),
-        timestamp: state.timeRemaining || 0,
-        ...action.event,
+        timestamp: Date.now(),
+        teamSide: action.event.teamSide,
+        playerId: action.event.playerId,
+        action: action.event.action,
       };
-
-      const team = event.team === 'HOME' ? 'homeTeam' : 'awayTeam';
-      const points = SCORING_ACTIONS[event.action].points;
-      const updatedPlayers = state[team].players.map(player => {
-        if (player.id === event.playerId) {
-          const stats = { ...player.stats };
-          
-          // Update player stats based on action
-          switch (event.action) {
-            case 'THREE_POINTER':
-              stats.points += 3;
-              stats.threePointers += 1;
-              break;
-            case 'TWO_POINTER':
-              stats.points += 2;
-              stats.twoPointers += 1;
-              break;
-            case 'FREE_THROW':
-              stats.points += 1;
-              stats.freeThrows += 1;
-              break;
-            case 'FOUL':
-              stats.fouls += 1;
-              break;
-            case 'ASSIST':
-              stats.assists += 1;
-              break;
-            case 'REBOUND':
-              stats.rebounds += 1;
-              break;
-            case 'BLOCK':
-              stats.blocks += 1;
-              break;
-            case 'STEAL':
-              stats.steals += 1;
-              break;
-          }
-          
-          return { ...player, stats };
-        }
-        return player;
-      });
-
       return {
         ...state,
-        [team]: {
-          ...state[team],
-          score: state[team].score + points,
-          players: updatedPlayers,
-        },
-        gameEvents: [...state.gameEvents, event],
+        gameEvents: [...state.gameEvents, newEvent],
       };
     }
 
@@ -219,7 +178,7 @@ function basketballGameReducer(state: GameState, action: GameAction): GameState 
           ...state[team],
           timeouts: Math.max(0, state[team].timeouts - 1),
         },
-        gamePaused: true,
+        isPaused: true,
       };
     }
 
@@ -246,7 +205,7 @@ export function BasketballGameProvider({ children }: { children: React.ReactNode
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    if (state.gameStarted && !state.gamePaused && state.timeRemaining !== null) {
+    if (state.isGameStarted && !state.isPaused && state.timeRemaining !== null) {
       interval = setInterval(() => {
         const currentTime = state.timeRemaining;
         if (currentTime !== null && currentTime > 0) {
@@ -262,7 +221,7 @@ export function BasketballGameProvider({ children }: { children: React.ReactNode
         clearInterval(interval);
       }
     };
-  }, [state.gameStarted, state.gamePaused, state.timeRemaining]);
+  }, [state.isGameStarted, state.isPaused, state.timeRemaining]);
 
   return (
     <BasketballGameContext.Provider value={{ state, dispatch }}>
