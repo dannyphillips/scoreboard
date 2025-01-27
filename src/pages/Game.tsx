@@ -3,11 +3,13 @@ import { useParams, Navigate } from 'react-router-dom';
 import GameProvider from '../context/GameProvider';
 import Yahtzee from '../games/yahtzee';
 import Basketball from '../games/basketball';
+import Football from '../games/football/Football';
 
 // Map of game IDs to their components
 const GAME_COMPONENTS: Record<string, React.ComponentType> = {
   yahtzee: Yahtzee,
   basketball: Basketball,
+  football: Football,
 };
 
 export default function Game() {

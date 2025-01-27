@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BasketballGameSettings, TIME_PRESETS, SCORE_PRESETS } from './types';
+import { TIME_PRESETS, SCORE_PRESETS } from './types';
 import { TEAM_PRESETS } from '../sports/teamPresets';
 import PlayerSelectionModal from '../../components/PlayerSelectionModal';
 import { useNavigate } from 'react-router-dom';
+import { FootballGameSettings } from './types';
 
 interface GameSettingsProps {
-  settings: BasketballGameSettings;
-  onSave: (settings: BasketballGameSettings) => void;
+  settings: FootballGameSettings;
+  onSave: (settings: FootballGameSettings) => void;
   onStart: () => void;
   isStarted: boolean;
 }
@@ -16,8 +17,9 @@ export default function GameSettings({
   settings,
   onSave,
   onStart,
+  isStarted
 }: GameSettingsProps) {
-  const [localSettings, setLocalSettings] = useState<BasketballGameSettings>(settings);
+  const [localSettings, setLocalSettings] = useState<FootballGameSettings>(settings);
   const [showPlayerModal, setShowPlayerModal] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<'home' | 'away'>('home');
   const navigate = useNavigate();
@@ -28,16 +30,34 @@ export default function GameSettings({
     onStart();
   };
 
-  const handleTeamSelect = (team: 'home' | 'away', preset: typeof TEAM_PRESETS[0]) => {
+  const handleTeamChange = (team: 'home' | 'away', preset: typeof TEAM_PRESETS[0]) => {
     const newSettings = {
       ...localSettings,
-      [team === 'home' ? 'homeTeam' : 'awayTeam']: {
-        ...localSettings[team === 'home' ? 'homeTeam' : 'awayTeam'],
+      [`${team}Team`]: {
+        ...localSettings[`${team}Team` as keyof FootballGameSettings],
         id: preset.id,
         name: preset.name,
-        color: preset.color,
-        logo: preset.logo
+        color: preset.color
       }
+    };
+    setLocalSettings(newSettings);
+    onSave(newSettings);
+  };
+
+  const handleTimeChange = (preset: typeof TIME_PRESETS[0]) => {
+    const newSettings = {
+      ...localSettings,
+      timeLength: preset.value
+    };
+    setLocalSettings(newSettings);
+    onSave(newSettings);
+  };
+
+  const handleScoreChange = (preset: typeof SCORE_PRESETS[0]) => {
+    const newSettings = {
+      ...localSettings,
+      finalScore: preset.value,
+      targetScore: preset.value
     };
     setLocalSettings(newSettings);
     onSave(newSettings);
@@ -98,13 +118,13 @@ export default function GameSettings({
               <div className="space-y-2">
                 <label className="text-sm text-gray-300">Select Team</label>
                 <div className="grid grid-cols-4 gap-2">
-                  {TEAM_PRESETS.map(preset => (
+                  {TEAM_PRESETS.map((preset) => (
                     <button
                       key={preset.id}
                       type="button"
-                      onClick={() => handleTeamSelect('home', preset)}
+                      onClick={() => handleTeamChange('home', preset)}
                       className={`aspect-square rounded-lg transition-all overflow-hidden relative ${
-                        localSettings.homeTeam.color === preset.color
+                        localSettings.homeTeam.id === preset.id
                           ? 'ring-4 ring-white scale-105'
                           : 'hover:scale-105'
                       }`}
@@ -171,11 +191,11 @@ export default function GameSettings({
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-white text-center">Game Duration</h3>
                 <div className="flex flex-col gap-2">
-                  {TIME_PRESETS.map(preset => (
+                  {TIME_PRESETS.map((preset) => (
                     <button
                       key={preset.value}
                       type="button"
-                      onClick={() => setLocalSettings(prev => ({ ...prev, timeLength: preset.value }))}
+                      onClick={() => handleTimeChange(preset)}
                       className={`px-4 py-2 rounded-lg text-center transition-all ${
                         localSettings.timeLength === preset.value
                           ? 'bg-cyan-500 text-white'
@@ -192,11 +212,11 @@ export default function GameSettings({
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-white text-center">Target Score</h3>
                 <div className="flex flex-col gap-2">
-                  {SCORE_PRESETS.map(preset => (
+                  {SCORE_PRESETS.map((preset) => (
                     <button
                       key={preset.value}
                       type="button"
-                      onClick={() => setLocalSettings(prev => ({ ...prev, finalScore: preset.value }))}
+                      onClick={() => handleScoreChange(preset)}
                       className={`px-4 py-2 rounded-lg text-center transition-all ${
                         localSettings.finalScore === preset.value
                           ? 'bg-cyan-500 text-white'
@@ -226,13 +246,13 @@ export default function GameSettings({
               <div className="space-y-2">
                 <label className="text-sm text-gray-300">Select Team</label>
                 <div className="grid grid-cols-4 gap-2">
-                  {TEAM_PRESETS.map(preset => (
+                  {TEAM_PRESETS.map((preset) => (
                     <button
                       key={preset.id}
                       type="button"
-                      onClick={() => handleTeamSelect('away', preset)}
+                      onClick={() => handleTeamChange('away', preset)}
                       className={`aspect-square rounded-lg transition-all overflow-hidden relative ${
-                        localSettings.awayTeam.color === preset.color
+                        localSettings.awayTeam.id === preset.id
                           ? 'ring-4 ring-white scale-105'
                           : 'hover:scale-105'
                       }`}

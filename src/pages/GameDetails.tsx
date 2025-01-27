@@ -1,48 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Game } from '../games/types';
-
-const GAMES: Record<string, Game> = {
-  yahtzee: {
-    id: 'yahtzee',
-    name: "Shake N' Score",
-    description: 'A thrilling dice game where strategy meets luck',
-    image: '/images/games/yahtzee-card.jpg',
-    rules: [
-      'Roll five dice up to three times per turn',
-      'Score points by matching specific combinations',
-      'Fill all categories to complete the game',
-      'Bonus points for scoring 63+ in the upper section',
-      'Extra points for additional five-of-a-kind after the first'
-    ],
-    features: [
-      'Multiple players support',
-      'Automatic scoring calculation',
-      'Score history tracking',
-      'Player statistics',
-      'Dark mode support'
-    ]
-  },
-  basketball: {
-    id: 'basketball',
-    name: 'Basketball',
-    description: 'Track basketball game scores and stats',
-    image: '/images/games/basketball-card.jpg',
-    rules: [
-      'Add points for field goals, three-pointers, and free throws',
-      'Track fouls and timeouts',
-      'Manage player substitutions',
-      'Monitor game clock and shot clock',
-      'Record player statistics'
-    ],
-    features: [
-      'Real-time scoring',
-      'Player rotation management',
-      'Team statistics',
-      'Game clock with automatic timeouts',
-      'Dark mode support'
-    ]
-  }
-};
+import { GAMES } from '../data/games';
 
 export default function GameDetails() {
   const { gameId } = useParams();
@@ -51,7 +8,7 @@ export default function GameDetails() {
 
   if (!game) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
+      <div className="flex items-center justify-center bg-gray-900 p-4">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-4">Game not found</h2>
           <button
@@ -66,7 +23,7 @@ export default function GameDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 p-8">
+    <div className="bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Left Column - Cover Photo */}
         <div className="relative">
@@ -91,7 +48,7 @@ export default function GameDetails() {
           <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 mb-8">
             <h2 className="text-2xl font-semibold mb-4">Rules</h2>
             <ul className="list-disc list-inside space-y-2">
-              {game.rules.map((rule, index) => (
+              {game.rules.map((rule: string, index: number) => (
                 <li key={index} className="text-gray-300">{rule}</li>
               ))}
             </ul>
@@ -100,7 +57,7 @@ export default function GameDetails() {
           <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6">
             <h2 className="text-2xl font-semibold mb-4">Features</h2>
             <ul className="list-disc list-inside space-y-2">
-              {game.features.map((feature, index) => (
+              {game.features.map((feature: string, index: number) => (
                 <li key={index} className="text-gray-300">{feature}</li>
               ))}
             </ul>

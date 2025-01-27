@@ -1,27 +1,30 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { GameState, GameMode, TeamSide, BasePlayer, GameEvent } from '../../types';
+import React from 'react';
+import { createGameContext, createGameProvider, createSportsGameReducer, SportsGameAction } from '../sports/SportsGameContext';
+import { BasketballGameState } from './types';
 import { GAME_MODES } from './basketballConfig';
-import { generateId } from '../../utils';
+import { TEAM_PRESETS } from '../sports/teamPresets';
 
 // Initial state for a new game
-const initialState: GameState = {
+const initialState: BasketballGameState = {
   gameMode: 'FIRST_TO_21',
-  timeRemaining: null,
+  timeRemaining: 900, // Default to 15 minutes
   isGameStarted: false,
   isPaused: false,
   isGameOver: false,
   homeTeam: {
-    id: 'home-team',
-    name: 'Home Team',
-    color: '#FF4136',
+    id: TEAM_PRESETS[0].id,
+    name: TEAM_PRESETS[0].name,
+    color: TEAM_PRESETS[0].color,
+    logo: TEAM_PRESETS[0].logo,
     score: 0,
     timeouts: 2,
     players: [],
   },
   awayTeam: {
-    id: 'away-team',
-    name: 'Away Team',
-    color: '#0074D9',
+    id: TEAM_PRESETS[1].id,
+    name: TEAM_PRESETS[1].name,
+    color: TEAM_PRESETS[1].color,
+    logo: TEAM_PRESETS[1].logo,
     score: 0,
     timeouts: 2,
     players: [],
@@ -30,137 +33,87 @@ const initialState: GameState = {
   shotClock: null,
   quarter: 1,
   gameEvents: [],
+  settings: {
+    timeLength: 900,
+    finalScore: 21,
+    homeTeam: {
+      id: TEAM_PRESETS[0].id,
+      name: TEAM_PRESETS[0].name,
+      color: TEAM_PRESETS[0].color,
+      logo: TEAM_PRESETS[0].logo,
+      score: 0,
+      timeouts: 2,
+      players: [],
+    },
+    awayTeam: {
+      id: TEAM_PRESETS[1].id,
+      name: TEAM_PRESETS[1].name,
+      color: TEAM_PRESETS[1].color,
+      logo: TEAM_PRESETS[1].logo,
+      score: 0,
+      timeouts: 2,
+      players: [],
+    }
+  }
 };
 
 // Action types
-type GameAction =
-  | { type: 'START_GAME'; gameMode: GameMode }
-  | { type: 'PAUSE_GAME' }
-  | { type: 'RESUME_GAME' }
-  | { type: 'RESET_GAME' }
-  | { type: 'UPDATE_TIME'; time: number }
-  | { type: 'ADD_PLAYER'; team: TeamSide; player: BasePlayer }
-  | { type: 'UPDATE_PLAYER'; team: TeamSide; player: BasePlayer }
-  | { type: 'REMOVE_PLAYER'; team: TeamSide; playerId: string }
-  | { type: 'TOGGLE_PLAYER_ACTIVE'; team: TeamSide; playerId: string }
-  | { type: 'RECORD_ACTION'; event: Omit<GameEvent, 'id' | 'timestamp'> }
-  | { type: 'CHANGE_POSSESSION' }
-  | { type: 'USE_TIMEOUT'; team: TeamSide }
-  | { type: 'NEXT_QUARTER' }
-  | { type: 'LOAD_GAME'; state: GameState };
+export type BasketballGameAction = SportsGameAction;
 
-// Create context
-const BasketballGameContext = createContext<{
-  state: GameState;
-  dispatch: React.Dispatch<GameAction>;
-} | null>(null);
+// Calculate score based on action type
+const calculateScore = (state: BasketballGameState, action: BasketballGameAction): number => {
+  if (action.type !== 'RECORD_ACTION' || !action.event) return 0;
 
-// Reducer function
-function basketballGameReducer(state: GameState, action: GameAction): GameState {
+  switch (action.event.action) {
+    case 'THREE_POINTER': return 3;
+    case 'TWO_POINTER': return 2;
+    case 'FREE_THROW': return 1;
+    case 'POINT_ADJUSTMENT': return -1;
+    default: return 0;
+  }
+};
+
+// Custom reducer for basketball-specific logic
+const customReducer = (state: BasketballGameState, action: BasketballGameAction): BasketballGameState | null => {
   switch (action.type) {
     case 'START_GAME': {
-      const gameMode = GAME_MODES[action.gameMode];
+      const gameMode = GAME_MODES[state.gameMode];
       return {
         ...state,
-        gameMode: action.gameMode,
-        timeRemaining: gameMode.timeLimit,
-        shotClock: action.gameMode === 'TOURNAMENT' ? 24 : null,
+        gameMode: state.gameMode,
+        timeRemaining: gameMode.timeLimit ?? state.timeRemaining,
+        shotClock: state.gameMode === 'TOURNAMENT' ? 24 : null,
         isGameStarted: true,
-        isPaused: false,
-      };
-    }
-
-    case 'PAUSE_GAME':
-      return { ...state, isPaused: true };
-
-    case 'RESUME_GAME':
-      return { ...state, isPaused: false };
-
-    case 'RESET_GAME':
-      return {
-        ...initialState,
-        homeTeam: { ...initialState.homeTeam, players: state.homeTeam.players },
-        awayTeam: { ...initialState.awayTeam, players: state.awayTeam.players },
-      };
-
-    case 'UPDATE_TIME':
-      return { ...state, timeRemaining: action.time };
-
-    case 'ADD_PLAYER': {
-      const team = action.team === 'HOME' ? 'homeTeam' : 'awayTeam';
-      const newPlayer = {
-        ...action.player,
-        stats: {
-          points: 0,
-          threePointers: 0,
-          twoPointers: 0,
-          freeThrows: 0,
-          fouls: 0,
-          assists: 0,
-          rebounds: 0,
-          blocks: 0,
-          steals: 0,
-        },
-        isActive: true,
-      };
-      return {
-        ...state,
-        [team]: {
-          ...state[team],
-          players: [...state[team].players, newPlayer],
-        },
-      };
-    }
-
-    case 'UPDATE_PLAYER': {
-      const team = action.team === 'HOME' ? 'homeTeam' : 'awayTeam';
-      return {
-        ...state,
-        [team]: {
-          ...state[team],
-          players: state[team].players.map((p: BasePlayer) =>
-            p.id === action.player.id ? { ...p, ...action.player } : p
-          ),
-        },
-      };
-    }
-
-    case 'REMOVE_PLAYER': {
-      const team = action.team === 'HOME' ? 'homeTeam' : 'awayTeam';
-      return {
-        ...state,
-        [team]: {
-          ...state[team],
-          players: state[team].players.filter((p: BasePlayer) => p.id !== action.playerId),
-        },
-      };
-    }
-
-    case 'TOGGLE_PLAYER_ACTIVE': {
-      const team = action.team === 'HOME' ? 'homeTeam' : 'awayTeam';
-      return {
-        ...state,
-        [team]: {
-          ...state[team],
-          players: state[team].players.map((p: BasePlayer) =>
-            p.id === action.playerId ? { ...p, isActive: !p.isActive } : p
-          ),
-        },
+        isPaused: true,
+        isGameOver: false
       };
     }
 
     case 'RECORD_ACTION': {
-      const newEvent: GameEvent = {
-        id: generateId(),
-        timestamp: Date.now(),
-        teamSide: action.event.teamSide,
-        playerId: action.event.playerId,
-        action: action.event.action,
-      };
-      return {
-        ...state,
-        gameEvents: [...state.gameEvents, newEvent],
-      };
+      if (action.type !== 'RECORD_ACTION' || !action.event) return null;
+      
+      const points = calculateScore(state, action);
+      const team = action.event.teamSide === 'HOME' ? 'homeTeam' : 'awayTeam';
+      const newScore = Math.max(0, state[team].score + points);
+      
+      // Get target score from game mode
+      const gameMode = GAME_MODES[state.gameMode];
+      const targetScore = gameMode.targetScore;
+      
+      // If target score is reached, end the game
+      if (targetScore && newScore >= targetScore) {
+        return {
+          ...state,
+          [team]: {
+            ...state[team],
+            score: newScore
+          },
+          isGameOver: true,
+          isPaused: true
+        };
+      }
+      
+      return null;
     }
 
     case 'CHANGE_POSSESSION':
@@ -170,69 +123,37 @@ function basketballGameReducer(state: GameState, action: GameAction): GameState 
         shotClock: state.shotClock ? 24 : null,
       };
 
-    case 'USE_TIMEOUT': {
-      const team = action.team === 'HOME' ? 'homeTeam' : 'awayTeam';
-      return {
-        ...state,
-        [team]: {
-          ...state[team],
-          timeouts: Math.max(0, state[team].timeouts - 1),
-        },
-        isPaused: true,
-      };
-    }
-
-    case 'NEXT_QUARTER':
+    case 'NEXT_PERIOD':
       return {
         ...state,
         quarter: state.quarter + 1,
         possession: state.quarter % 2 === 0 ? 'HOME' : 'AWAY',
       };
 
-    case 'LOAD_GAME':
-      return action.state;
-
     default:
-      return state;
+      return null;
   }
-}
+};
 
-// Provider component
-export function BasketballGameProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(basketballGameReducer, initialState);
+// Create the basketball game reducer
+const basketballGameReducer = createSportsGameReducer<BasketballGameState, BasketballGameAction>(
+  calculateScore,
+  customReducer
+);
 
-  // Game clock effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
+// Create the context
+const BasketballGameContext = createGameContext<BasketballGameState, BasketballGameAction>();
 
-    if (state.isGameStarted && !state.isPaused && state.timeRemaining !== null) {
-      interval = setInterval(() => {
-        const currentTime = state.timeRemaining;
-        if (currentTime !== null && currentTime > 0) {
-          dispatch({ type: 'UPDATE_TIME', time: currentTime - 1 });
-        } else {
-          dispatch({ type: 'PAUSE_GAME' });
-        }
-      }, 1000);
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [state.isGameStarted, state.isPaused, state.timeRemaining]);
-
-  return (
-    <BasketballGameContext.Provider value={{ state, dispatch }}>
-      {children}
-    </BasketballGameContext.Provider>
-  );
-}
+// Create the provider
+export const BasketballGameProvider = createGameProvider(
+  BasketballGameContext,
+  basketballGameReducer,
+  initialState
+);
 
 // Custom hook for using the basketball game context
 export function useBasketballGame() {
-  const context = useContext(BasketballGameContext);
+  const context = React.useContext(BasketballGameContext);
   if (!context) {
     throw new Error('useBasketballGame must be used within a BasketballGameProvider');
   }

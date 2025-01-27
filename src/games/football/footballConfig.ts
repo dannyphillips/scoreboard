@@ -1,4 +1,4 @@
-import { GameMode, BasketballScoringActionType, ScoringAction } from '../../types';
+import { GameMode, FootballScoringActionType, ScoringAction } from '../../types';
 
 export const GAME_MODES: Record<GameMode, {
   name: string;
@@ -14,8 +14,8 @@ export const GAME_MODES: Record<GameMode, {
     description: 'Quick game to 11 points',
     targetScore: 11,
     timeLimit: null,
-    winBy: 2,
-    maxPlayers: 5,
+    winBy: 1,
+    maxPlayers: 11,
     allowSubstitutions: true,
   },
   FIRST_TO_21: {
@@ -23,8 +23,8 @@ export const GAME_MODES: Record<GameMode, {
     description: 'Classic game to 21 points',
     targetScore: 21,
     timeLimit: null,
-    winBy: 2,
-    maxPlayers: 5,
+    winBy: 1,
+    maxPlayers: 11,
     allowSubstitutions: true,
   },
   FIRST_TO_28: {
@@ -32,8 +32,8 @@ export const GAME_MODES: Record<GameMode, {
     description: 'Extended game to 28 points',
     targetScore: 28,
     timeLimit: null,
-    winBy: 2,
-    maxPlayers: 5,
+    winBy: 1,
+    maxPlayers: 11,
     allowSubstitutions: true,
   },
   FIRST_TO_35: {
@@ -41,78 +41,48 @@ export const GAME_MODES: Record<GameMode, {
     description: 'Long game to 35 points',
     targetScore: 35,
     timeLimit: null,
-    winBy: 2,
-    maxPlayers: 5,
+    winBy: 1,
+    maxPlayers: 11,
     allowSubstitutions: true,
   },
   TIMED_GAME: {
-    name: '48 Minute Game',
-    description: '48 minute game with running clock',
+    name: '60 Minute Game',
+    description: '60 minute game with running clock',
     targetScore: null,
-    timeLimit: 2880,
+    timeLimit: 3600,
     winBy: 1,
-    maxPlayers: 5,
+    maxPlayers: 11,
     allowSubstitutions: true,
   },
   TOURNAMENT: {
     name: 'Tournament Mode',
-    description: '20 minute game or first to 35',
+    description: '30 minute game or first to 35',
     targetScore: 35,
-    timeLimit: 1200,
+    timeLimit: 1800,
     winBy: 1,
-    maxPlayers: 5,
+    maxPlayers: 11,
     allowSubstitutions: true,
   }
 };
 
-export const SCORING_ACTIONS: Record<BasketballScoringActionType, ScoringAction> = {
-  THREE_POINTER: {
-    type: 'THREE_POINTER',
-    points: 3,
+export const SCORING_ACTIONS: Record<FootballScoringActionType, ScoringAction> = {
+  TOUCHDOWN: {
+    type: 'TOUCHDOWN',
+    points: 6,
     color: 'bg-emerald-500',
-    icon: 'sports_basketball',
+    icon: 'sports_football',
   },
-  TWO_POINTER: {
-    type: 'TWO_POINTER',
-    points: 2,
+  FIELD_GOAL: {
+    type: 'FIELD_GOAL',
+    points: 3,
     color: 'bg-sky-500',
-    icon: 'sports_basketball',
+    icon: 'sports_football',
   },
-  FREE_THROW: {
-    type: 'FREE_THROW',
+  EXTRA_POINT: {
+    type: 'EXTRA_POINT',
     points: 1,
     color: 'bg-purple-500',
-    icon: 'sports_basketball',
-  },
-  FOUL: {
-    type: 'FOUL',
-    points: 0,
-    color: 'bg-yellow-500',
-    icon: 'warning',
-  },
-  ASSIST: {
-    type: 'ASSIST',
-    points: 0,
-    color: 'bg-blue-500',
-    icon: 'handshake',
-  },
-  REBOUND: {
-    type: 'REBOUND',
-    points: 0,
-    color: 'bg-orange-500',
-    icon: 'refresh',
-  },
-  BLOCK: {
-    type: 'BLOCK',
-    points: 0,
-    color: 'bg-red-500',
-    icon: 'block',
-  },
-  STEAL: {
-    type: 'STEAL',
-    points: 0,
-    color: 'bg-indigo-500',
-    icon: 'swipe',
+    icon: 'sports_football',
   },
   POINT_ADJUSTMENT: {
     type: 'POINT_ADJUSTMENT',

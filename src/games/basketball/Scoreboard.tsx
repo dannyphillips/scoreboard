@@ -107,9 +107,9 @@ export default function Scoreboard({
           {/* Home Team */}
           <div className="flex flex-col items-center">
             <img 
-              src={TEAM_PRESETS.find(t => t.color === homeTeam.color)?.logo} 
+              src={TEAM_PRESETS.find(t => t.color === homeTeam.color)?.logo || '/images/teams/home-team.png'} 
               alt={homeTeam.name}
-              className="w-32 h-32 object-contain mb-4"
+              className="w-16 h-16 sm:w-24 md:w-32 sm:h-24 md:h-32 object-contain mb-2 sm:mb-4"
             />
             <h2 className="text-4xl font-bold text-white mb-4">{homeTeam.name}</h2>
             <div className="text-[6rem] font-['Wallpoet'] text-white leading-none">
@@ -177,9 +177,9 @@ export default function Scoreboard({
           {/* Away Team */}
           <div className="flex flex-col items-center">
             <img 
-              src={TEAM_PRESETS.find(t => t.color === awayTeam.color)?.logo} 
+              src={TEAM_PRESETS.find(t => t.color === awayTeam.color)?.logo || '/images/teams/away-team.png'} 
               alt={awayTeam.name}
-              className="w-32 h-32 object-contain mb-4"
+              className="w-16 h-16 sm:w-24 md:w-32 sm:h-24 md:h-32 object-contain mb-2 sm:mb-4"
             />
             <h2 className="text-4xl font-bold text-white mb-4">{awayTeam.name}</h2>
             <div className="text-[6rem] font-['Wallpoet'] text-white leading-none">
