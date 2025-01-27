@@ -1,3 +1,4 @@
+import { getImagePath } from '../utils';
 import { Game } from '../types/games';
 
 export const GAMES: Record<string, Game> = {
@@ -5,7 +6,7 @@ export const GAMES: Record<string, Game> = {
     id: 'yahtzee',
     name: "Shake N' Score",
     description: 'A thrilling dice game where strategy meets luck',
-    image: '/images/games/yahtzee-card.jpg',
+    image: getImagePath('/images/games/yahtzee-card.jpg'),
     rules: [
       'Roll five dice up to three times per turn',
       'Score points by matching specific combinations',
@@ -25,7 +26,7 @@ export const GAMES: Record<string, Game> = {
     id: 'basketball',
     name: 'Basketball',
     description: 'Track basketball game scores and stats',
-    image: '/images/games/basketball-card.jpg',
+    image: getImagePath('/images/games/basketball-card.jpg'),
     rules: [
       'Add points for field goals, three-pointers, and free throws',
       'Track fouls and timeouts',
@@ -45,7 +46,7 @@ export const GAMES: Record<string, Game> = {
     id: 'football',
     name: 'Football',
     description: 'Track football game scores with touchdowns, field goals, and more',
-    image: '/images/games/football-card.jpg',
+    image: getImagePath('/images/games/football-card.jpg'),
     rules: [
       'Score touchdowns (6 points)',
       'Kick field goals (3 points)',

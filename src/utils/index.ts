@@ -38,4 +38,14 @@ export function formatDate(date: Date): string {
  */
 export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/**
+ * Gets the correct path for an image, including the base URL in production
+ * @param {string} path - The image path relative to the public directory
+ * @returns {string} The complete image path
+ */
+export function getImagePath(path: string): string {
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  return `${baseUrl.replace(/\/$/, '')}${path}`;
 } 

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { getImagePath } from '../utils';
 
 function Navigation() {
   return (
@@ -7,7 +8,7 @@ function Navigation() {
         <div className="flex justify-between items-center">
           <Link to="/" className="flex items-center space-x-3 group">
             <img 
-              src="/images/logo-light.png"
+              src={getImagePath('/images/logo-light.png')}
               alt="Scoreboard" 
               className="w-14 h-14 drop-shadow-md transform group-hover:scale-105 transition-transform"
             />

@@ -4,6 +4,7 @@ import { GAME_MODES } from './basketballConfig';
 import GameSettings from './GameSettings';
 import { ScoringActionType } from '../../types';
 import { TEAM_PRESETS } from '../sports/teamPresets';
+import { getImagePath } from '../../utils';
 
 const BASKETBALL_SCORING_OPTIONS: ScoringOption[] = [
   { points: -1, label: '-1', action: 'POINT_ADJUSTMENT' },
@@ -41,26 +42,52 @@ export default function Basketball() {
         ...state,
         homeTeam: {
           ...settings.homeTeam,
-          logo: homeTeamPreset?.logo || '/images/teams/home-team.png'
+          logo: homeTeamPreset?.logo || getImagePath('/images/teams/home-team.png')
         },
         awayTeam: {
           ...settings.awayTeam,
-          logo: awayTeamPreset?.logo || '/images/teams/away-team.png'
+          logo: awayTeamPreset?.logo || getImagePath('/images/teams/away-team.png')
         },
         timeRemaining: settings.timeLength,
         settings: {
           ...settings,
           homeTeam: {
             ...settings.homeTeam,
-            logo: homeTeamPreset?.logo || '/images/teams/home-team.png'
+            logo: homeTeamPreset?.logo || getImagePath('/images/teams/home-team.png')
           },
           awayTeam: {
             ...settings.awayTeam,
-            logo: awayTeamPreset?.logo || '/images/teams/away-team.png'
+            logo: awayTeamPreset?.logo || getImagePath('/images/teams/away-team.png')
           }
         }
       }
     });
+  };
+
+  // Update the defaultTeams object
+  const defaultTeams = {
+    home: {
+      name: 'Home Team',
+      color: '#4A90E2',
+      logo: getImagePath('/images/teams/home-team.png'),
+      score: 0,
+      fouls: 0,
+      timeouts: 4
+    },
+    away: {
+      name: 'Away Team',
+      color: '#E24A4A',
+      logo: getImagePath('/images/teams/away-team.png'),
+      score: 0,
+      fouls: 0,
+      timeouts: 4
+    }
+  };
+
+  // Update the defaultLogos object
+  const defaultLogos = {
+    home: getImagePath('/images/teams/home-team.png'),
+    away: getImagePath('/images/teams/away-team.png')
   };
 
   return (
@@ -70,8 +97,8 @@ export default function Basketball() {
       scoringOptions={BASKETBALL_SCORING_OPTIONS}
       periodLabel="QUARTER"
       defaultTeamLogos={{
-        home: '/images/teams/home-team.png',
-        away: '/images/teams/away-team.png'
+        home: defaultLogos.home,
+        away: defaultLogos.away
       }}
       calculateScore={calculateScore}
       GameSettings={GameSettings}
