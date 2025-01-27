@@ -1,211 +1,114 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { GameMode, GameEvent, TeamSide, ScoringActionType } from '../../types';
-import { GAME_MODES } from './footballConfig';
-import { generateId } from '../../utils';
-import { FootballTeam } from './types';
+import { createContext, useContext } from 'react';
+import { SportsGameState, SportsGameAction, createGameContext, createSportsGameReducer, createGameProvider, createInitialState } from '../sports/SportsGameContext';
+import { FootballGameMode } from './types';
 
-interface FootballGameState {
-  gameMode: GameMode;
-  timeRemaining: number | null;
-  isGameStarted: boolean;
-  isPaused: boolean;
-  isGameOver: boolean;
-  homeTeam: FootballTeam;
-  awayTeam: FootballTeam;
-  possession: TeamSide;
-  quarter: number;
-  gameEvents: GameEvent[];
+export interface FootballGameState extends SportsGameState {
+  gameMode: FootballGameMode;
+  targetScore: number;
 }
 
-type GameAction =
-  | { type: 'START_GAME'; gameMode: GameMode }
-  | { type: 'PAUSE_GAME' }
-  | { type: 'RESUME_GAME' }
-  | { type: 'RESET_GAME' }
-  | { type: 'UPDATE_TIME'; time: number }
-  | { type: 'RECORD_ACTION'; event: Omit<GameEvent, 'id' | 'timestamp'> }
-  | { type: 'CHANGE_POSSESSION' }
-  | { type: 'USE_TIMEOUT'; team: TeamSide }
-  | { type: 'NEXT_QUARTER' }
-  | { type: 'LOAD_GAME'; state: FootballGameState };
+export type FootballGameAction = SportsGameAction;
 
-const initialState: FootballGameState = {
-  gameMode: 'TIMED_GAME',
-  timeRemaining: 900, // 15 minutes
-  isGameStarted: false,
-  isPaused: true,
-  isGameOver: false,
-  homeTeam: {
-    id: 'home',
-    name: 'Home Team',
-    color: '#FF4136',
-    score: 0,
-    timeouts: 3,
-    players: []
-  },
-  awayTeam: {
-    id: 'away',
-    name: 'Away Team',
-    color: '#0074D9',
-    score: 0,
-    timeouts: 3,
-    players: []
-  },
-  possession: 'HOME',
-  quarter: 1,
-  gameEvents: []
+const FootballGameContext = createGameContext<FootballGameState, FootballGameAction>();
+
+const calculateScore = (state: FootballGameState, action: FootballGameAction): number => {
+  if (action.type !== 'RECORD_ACTION') return 0;
+  
+  switch (action.event.action) {
+    case 'TOUCHDOWN':
+      return 6;
+    case 'FIELD_GOAL':
+      return 3;
+    case 'EXTRA_POINT':
+      return 1;
+    case 'POINT_ADJUSTMENT':
+      return -1;
+    default:
+      return 0;
+  }
 };
 
-const FootballGameContext = createContext<{
-  state: FootballGameState;
-  dispatch: React.Dispatch<GameAction>;
-} | null>(null);
-
-function footballGameReducer(state: FootballGameState, action: GameAction): FootballGameState {
-  switch (action.type) {
-    case 'START_GAME':
+const footballGameReducer = createSportsGameReducer<FootballGameState, FootballGameAction>(
+  calculateScore,
+  (state, action) => {
+    if (action.type === 'START_GAME') {
       return {
         ...state,
         isGameStarted: true,
-        isPaused: false,
-        gameMode: action.gameMode
+        isPaused: true, // Start paused
+        gameMode: action.gameMode as FootballGameMode
       };
+    }
 
-    case 'PAUSE_GAME':
-      return {
+    if (action.type === 'LOAD_GAME') {
+      const targetScore = action.state.targetScore || (action.state.settings?.finalScore as number) || state.targetScore;
+      const newState = {
         ...state,
-        isPaused: true
-      };
-
-    case 'RESUME_GAME':
-      return {
-        ...state,
-        isPaused: false
-      };
-
-    case 'RESET_GAME':
-      return {
-        ...initialState,
-        homeTeam: {
-          ...initialState.homeTeam,
-          players: state.homeTeam.players
-        },
-        awayTeam: {
-          ...initialState.awayTeam,
-          players: state.awayTeam.players
+        ...action.state,
+        targetScore, // Set target score
+        settings: {
+          ...state.settings,
+          ...action.state.settings,
+          finalScore: targetScore // Keep finalScore in sync with targetScore
         }
       };
+      return newState as FootballGameState;
+    }
 
-    case 'UPDATE_TIME':
-      return {
-        ...state,
-        timeRemaining: action.time,
-        isGameOver: action.time <= 0
-      };
-
-    case 'RECORD_ACTION': {
-      const newEvent: GameEvent = {
-        id: generateId(),
-        timestamp: Date.now(),
-        teamSide: action.event.teamSide,
-        playerId: action.event.playerId,
-        action: action.event.action,
-      };
-
-      // Calculate points based on action type
-      let points = 0;
-      switch (action.event.action) {
-        case 'TOUCHDOWN':
-          points = 6;
-          break;
-        case 'FIELD_GOAL':
-          points = 3;
-          break;
-        case 'EXTRA_POINT':
-          points = 1;
-          break;
-        case 'POINT_ADJUSTMENT':
-          points = -1;
-          break;
-        default:
-          points = 0;
-      }
-
-      // Update team score
+    if (action.type === 'RECORD_ACTION') {
+      const points = calculateScore(state, action);
       const team = action.event.teamSide === 'HOME' ? 'homeTeam' : 'awayTeam';
       const newScore = Math.max(0, state[team].score + points);
-
-      // Check if target score is reached
-      const gameMode = GAME_MODES[state.gameMode];
-      const targetScore = gameMode.targetScore;
-      const isGameOver = targetScore ? newScore >= targetScore : state.isGameOver;
-
-      return {
-        ...state,
-        gameEvents: [...state.gameEvents, newEvent],
-        [team]: {
-          ...state[team],
-          score: newScore
-        },
-        isGameOver,
-        isPaused: isGameOver ? true : state.isPaused
-      };
+      
+      // If target score is reached, end the game
+      if (newScore >= state.targetScore) {
+        return {
+          ...state,
+          [team]: {
+            ...state[team],
+            score: newScore
+          },
+          isGameOver: true,
+          isPaused: true
+        };
+      }
     }
 
-    case 'CHANGE_POSSESSION':
-      return {
-        ...state,
-        possession: state.possession === 'HOME' ? 'AWAY' : 'HOME',
-      };
-
-    case 'USE_TIMEOUT': {
-      const team = action.team === 'HOME' ? 'homeTeam' : 'awayTeam';
-      return {
-        ...state,
-        [team]: {
-          ...state[team],
-          timeouts: Math.max(0, state[team].timeouts - 1),
-        },
-        isPaused: true,
-      };
-    }
-
-    case 'NEXT_QUARTER':
-      return {
-        ...state,
-        quarter: state.quarter + 1,
-        possession: state.quarter % 2 === 0 ? 'HOME' : 'AWAY',
-      };
-
-    case 'LOAD_GAME':
-      return action.state;
-
-    default:
-      return state;
+    return null;
   }
-}
+);
 
-export function FootballGameProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(footballGameReducer, initialState);
-
-  useEffect(() => {
-    let timer: number;
-    if (state.isGameStarted && !state.isPaused && state.timeRemaining !== null && state.timeRemaining > 0) {
-      timer = window.setInterval(() => {
-        if (state.timeRemaining !== null) {
-          dispatch({ type: 'UPDATE_TIME', time: state.timeRemaining - 1 });
-        }
-      }, 1000);
+const initialState = {
+  ...createInitialState('quarter', 900),
+  gameMode: 'FIRST_TO_21' as FootballGameMode,
+  targetScore: 21,
+  settings: {
+    timeLength: 900,
+    finalScore: 21,
+    homeTeam: {
+      id: 'home',
+      name: 'Home Team',
+      color: '#FF4136',
+      score: 0,
+      timeouts: 3,
+      players: []
+    },
+    awayTeam: {
+      id: 'away',
+      name: 'Away Team',
+      color: '#0074D9',
+      score: 0,
+      timeouts: 3,
+      players: []
     }
-    return () => clearInterval(timer);
-  }, [state.isGameStarted, state.isPaused, state.timeRemaining]);
+  }
+};
 
-  return (
-    <FootballGameContext.Provider value={{ state, dispatch }}>
-      {children}
-    </FootballGameContext.Provider>
-  );
-}
+export const FootballGameProvider = createGameProvider(
+  FootballGameContext,
+  footballGameReducer,
+  initialState
+);
 
 export function useFootballGame() {
   const context = useContext(FootballGameContext);

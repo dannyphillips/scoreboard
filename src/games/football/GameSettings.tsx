@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { TIME_PRESETS, SCORE_PRESETS, TEAM_PRESETS } from './types';
+import { TIME_PRESETS, SCORE_PRESETS } from './types';
+import { TEAM_PRESETS } from '../sports/teamPresets';
 import PlayerSelectionModal from '../../components/PlayerSelectionModal';
 import { useNavigate } from 'react-router-dom';
 import { FootballGameSettings } from './types';
@@ -45,18 +46,18 @@ export default function GameSettings({
 
   const handleTimeChange = (preset: typeof TIME_PRESETS[0]) => {
     const newSettings = {
-      homeTeam: settings.homeTeam,
-      awayTeam: settings.awayTeam,
-      timeLength: preset.value,
-      finalScore: settings.finalScore
-    } as FootballGameSettings;
+      ...localSettings,
+      timeLength: preset.value
+    };
+    setLocalSettings(newSettings);
     onSave(newSettings);
   };
 
   const handleScoreChange = (preset: typeof SCORE_PRESETS[0]) => {
     const newSettings = {
       ...localSettings,
-      finalScore: preset.value
+      finalScore: preset.value,
+      targetScore: preset.value
     };
     setLocalSettings(newSettings);
     onSave(newSettings);
@@ -117,7 +118,7 @@ export default function GameSettings({
               <div className="space-y-2">
                 <label className="text-sm text-gray-300">Select Team</label>
                 <div className="grid grid-cols-4 gap-2">
-                  {TEAM_PRESETS.slice(0, 6).map((preset) => (
+                  {TEAM_PRESETS.map((preset) => (
                     <button
                       key={preset.id}
                       type="button"
@@ -245,7 +246,7 @@ export default function GameSettings({
               <div className="space-y-2">
                 <label className="text-sm text-gray-300">Select Team</label>
                 <div className="grid grid-cols-4 gap-2">
-                  {TEAM_PRESETS.slice(6, 12).map((preset) => (
+                  {TEAM_PRESETS.map((preset) => (
                     <button
                       key={preset.id}
                       type="button"

@@ -7,10 +7,7 @@ export interface BasePlayer {
 
 export type TeamSide = 'HOME' | 'AWAY';
 
-export type GameMode = 
-  | 'FIRST_TO_21'
-  | 'TIMED_GAME'
-  | 'TOURNAMENT';
+export type GameMode = 'TIMED_GAME' | 'TOURNAMENT' | 'FIRST_TO_21' | 'FIRST_TO_28' | 'FIRST_TO_35';
 
 export type ScoringActionType = 
   | 'TOUCHDOWN'

@@ -1,5 +1,5 @@
 import { useBasketballGame } from './BasketballContext';
-import Scoreboard from '../../components/Scoreboard';
+import Scoreboard from '../sports/Scoreboard';
 import { GAME_MODES, SCORING_ACTIONS } from './basketballConfig';
 import GameSettings from './GameSettings';
 import { ScoringActionType } from '../../types';

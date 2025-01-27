@@ -1,128 +1,122 @@
-import { useFootballGame } from './FootballContext';
-import Scoreboard from '../../components/Scoreboard';
-import { GAME_MODES } from './footballConfig';
-import GameSettings from './GameSettings';
+import { useFootballGame, FootballGameState, FootballGameAction } from './FootballContext';
+import SportsGame from '../sports/SportsGame';
 import { ScoringActionType } from '../../types';
+import { TIME_PRESETS, SCORE_PRESETS } from './types';
+import GameSettings from './GameSettings';
+import { ScoringOption } from '../sports/SportsGame';
+import { TEAM_PRESETS } from '../sports/teamPresets';
 
-const FOOTBALL_SCORING_OPTIONS = [
-  { points: -1, label: '-1' }, // Point adjustment
-  { points: 1, label: '+1' },  // Extra point
-  { points: 3, label: '+3' },  // Field goal
-  { points: 6, label: '+6' }   // Touchdown
+const DEFAULT_TARGET_SCORE = 21;
+
+const FOOTBALL_SCORING_OPTIONS: ScoringOption[] = [
+  { points: -1, label: '-1', action: 'POINT_ADJUSTMENT' },
+  { points: 1, label: '+1', action: 'EXTRA_POINT' },
+  { points: 3, label: '+3', action: 'FIELD_GOAL' },
+  { points: 6, label: '+6', action: 'TOUCHDOWN' }
 ];
+
+const calculateScore = (points: number): ScoringActionType => {
+  switch (points) {
+    case -1: return 'POINT_ADJUSTMENT';
+    case 1: return 'EXTRA_POINT';
+    case 3: return 'FIELD_GOAL';
+    case 6: return 'TOUCHDOWN';
+    default: return 'POINT_ADJUSTMENT';
+  }
+};
+
+const getGameModeForScore = (score: number): FootballGameState['gameMode'] => {
+  switch (score) {
+    case 21: return 'FIRST_TO_21';
+    case 28: return 'FIRST_TO_28';
+    case 35: return 'FIRST_TO_35';
+    default: return 'FIRST_TO_21';
+  }
+};
 
 export default function Football() {
   const { state, dispatch } = useFootballGame();
 
-  const handleAddPoints = (team: 'home' | 'away', points: number) => {
-    const teamSide = team === 'home' ? 'HOME' : 'AWAY';
-    let action: ScoringActionType;
-    
-    if (points === -1) action = 'POINT_ADJUSTMENT';
-    else if (points === 1) action = 'EXTRA_POINT';
-    else if (points === 3) action = 'FIELD_GOAL';
-    else if (points === 6) action = 'TOUCHDOWN';
-    else return; // Invalid points value
-    
-    dispatch({ 
-      type: 'RECORD_ACTION', 
-      event: {
-        teamSide,
-        playerId: state[team === 'home' ? 'homeTeam' : 'awayTeam'].players[0]?.id || '',
-        action
-      }
-    });
-  };
-
-  const handleAddTime = (seconds: number) => {
-    if (state.timeRemaining !== null) {
-      const newTime = Math.max(0, state.timeRemaining + seconds);
-      dispatch({ type: 'UPDATE_TIME', time: newTime });
+  const getFinalScore = () => {
+    switch (state.gameMode) {
+      case 'FIRST_TO_21': return 21;
+      case 'FIRST_TO_28': return 28;
+      case 'FIRST_TO_35': return 35;
+      default: return DEFAULT_TARGET_SCORE;
     }
   };
 
-  const handlePause = () => {
-    dispatch({ type: 'PAUSE_GAME' });
+  const getTeamPreset = (teamId: string) => {
+    return TEAM_PRESETS.find(preset => preset.id === teamId) || TEAM_PRESETS[0];
   };
 
-  const handleResume = () => {
-    dispatch({ type: 'RESUME_GAME' });
-  };
+  const homeTeamPreset = getTeamPreset(state.homeTeam.id);
+  const awayTeamPreset = getTeamPreset(state.awayTeam.id);
 
-  const handleShowSettings = () => {
-    dispatch({ type: 'RESET_GAME' });
-  };
+  const handleSettingsSave = (settings: any) => {
+    // Ensure we have a valid target score
+    const targetScore = settings.finalScore || DEFAULT_TARGET_SCORE;
+    
+    const newState = {
+      ...state,
+      gameMode: getGameModeForScore(targetScore),
+      targetScore: targetScore, // Set the target score explicitly
+      settings: {
+        ...settings,
+        finalScore: targetScore // Ensure finalScore is also set in settings
+      },
+      timeRemaining: settings.timeLength,
+      homeTeam: {
+        ...state.homeTeam,
+        ...settings.homeTeam,
+        name: settings.homeTeam.name || homeTeamPreset.name,
+        score: 0
+      },
+      awayTeam: {
+        ...state.awayTeam,
+        ...settings.awayTeam,
+        name: settings.awayTeam.name || awayTeamPreset.name,
+        score: 0
+      },
+      isGameStarted: false,
+      isPaused: true,
+      isGameOver: false
+    } as FootballGameState;
 
-  const handleReset = () => {
-    dispatch({ type: 'RESET_GAME' });
+    dispatch({ 
+      type: 'LOAD_GAME', 
+      state: newState
+    } as FootballGameAction);
   };
-
-  const getFinalScore = () => {
-    const gameMode = GAME_MODES[state.gameMode];
-    return gameMode.targetScore;
-  };
-
-  const getWinner = () => {
-    if (!state.isGameOver) return null;
-    return state.homeTeam.score > state.awayTeam.score ? state.homeTeam : state.awayTeam;
-  };
-
-  const handleStartGame = () => {
-    const gameMode = GAME_MODES[state.gameMode];
-    const startTime = gameMode.timeLimit ?? state.timeRemaining ?? 900; // Default to 15 minutes
-    dispatch({ type: 'UPDATE_TIME', time: startTime });
-    dispatch({ type: 'START_GAME', gameMode: state.gameMode });
-  };
-
-  if (!state.isGameStarted) {
-    return (
-      <GameSettings 
-        settings={{
-          homeTeam: state.homeTeam,
-          awayTeam: state.awayTeam,
-          timeLength: state.timeRemaining ?? 0,
-          finalScore: getFinalScore() ?? 0
-        }}
-        onSave={(settings) => {
-          // Handle settings update if needed
-          handleStartGame();
-        }}
-        onStart={handleStartGame}
-        isStarted={state.isGameStarted}
-      />
-    );
-  }
 
   return (
-    <Scoreboard
-      homeTeam={{
-        id: state.homeTeam.id,
-        name: state.homeTeam.name,
-        color: state.homeTeam.color,
-        score: state.homeTeam.score
-      }}
-      awayTeam={{
-        id: state.awayTeam.id,
-        name: state.awayTeam.name,
-        color: state.awayTeam.color,
-        score: state.awayTeam.score
-      }}
-      timeRemaining={state.timeRemaining ?? 0}
-      isPaused={state.isPaused}
-      finalScore={getFinalScore()}
-      winner={getWinner()}
+    <SportsGame<FootballGameState, FootballGameAction>
+      state={state}
+      dispatch={dispatch}
       scoringOptions={FOOTBALL_SCORING_OPTIONS}
       periodLabel="QUARTER"
       defaultTeamLogos={{
-        home: '/images/football.png',
-        away: '/images/football.png'
+        home: homeTeamPreset.logo,
+        away: awayTeamPreset.logo
       }}
-      onPause={handlePause}
-      onResume={handleResume}
-      onAddPoints={handleAddPoints}
-      onAddTime={handleAddTime}
-      onShowSettings={handleShowSettings}
-      onReset={handleReset}
+      calculateScore={calculateScore}
+      GameSettings={GameSettings}
+      settingsProps={{
+        settings: {
+          homeTeam: state.homeTeam,
+          awayTeam: state.awayTeam,
+          timeLength: state.timeRemaining ?? 900,
+          finalScore: state.targetScore
+        },
+        onSave: handleSettingsSave,
+        teamPresets: TEAM_PRESETS,
+        timePresets: TIME_PRESETS,
+        scorePresets: SCORE_PRESETS,
+        sportName: 'Football',
+        defaultLogo: TEAM_PRESETS[0].logo
+      }}
+      finalScore={state.targetScore}
+      scoreLabel="TARGET"
     />
   );
 } 

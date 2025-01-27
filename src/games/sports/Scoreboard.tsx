@@ -35,6 +35,7 @@ interface ScoreboardProps {
   onAddTime: (seconds: number) => void;
   onShowSettings: () => void;
   onReset: () => void;
+  scoreLabel?: string;
 }
 
 export default function Scoreboard({
@@ -52,7 +53,8 @@ export default function Scoreboard({
   onAddPoints,
   onAddTime,
   onShowSettings,
-  onReset
+  onReset,
+  scoreLabel = 'GOAL'
 }: ScoreboardProps) {
   const navigate = useNavigate();
   const [showConfirmDialog, setShowConfirmDialog] = useState<boolean>(false);
@@ -122,7 +124,7 @@ export default function Scoreboard({
             <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
               <div className="bg-gray-800/80 backdrop-blur px-8 py-4 rounded-xl border-2 border-yellow-500 text-center">
                 <div className="text-yellow-500 text-base font-semibold uppercase tracking-wider mb-1">
-                  Goal
+                  {scoreLabel}
                 </div>
                 <div className="text-4xl font-bold text-yellow-500">
                   {finalScore}
