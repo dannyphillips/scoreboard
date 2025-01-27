@@ -13,13 +13,13 @@ export interface Team {
 
 export interface SportsGameState {
   gameMode: GameMode;
-  timeRemaining: number | null;
+  timeRemaining: number;
   isGameStarted: boolean;
   isPaused: boolean;
   isGameOver: boolean;
   homeTeam: Team;
   awayTeam: Team;
-  possession: TeamSide;
+  possession?: 'HOME' | 'AWAY';
   quarter: number;
   gameEvents: GameEvent[];
   targetScore?: number;
@@ -44,7 +44,6 @@ export type SportsGameAction =
   | { type: 'LOAD_GAME'; state: SportsGameState };
 
 export const createInitialState = (
-  periodName: string = 'quarter',
   initialTimeInSeconds: number = 900
 ): SportsGameState => ({
   gameMode: 'TIMED_GAME',

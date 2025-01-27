@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import { useContext } from 'react';
 import { SportsGameState, SportsGameAction, createGameContext, createSportsGameReducer, createGameProvider, createInitialState } from '../sports/SportsGameContext';
 import { FootballGameMode } from './types';
 import { TEAM_PRESETS } from '../sports/teamPresets';
@@ -12,20 +12,15 @@ export type FootballGameAction = SportsGameAction;
 
 const FootballGameContext = createGameContext<FootballGameState, FootballGameAction>();
 
-const calculateScore = (state: FootballGameState, action: FootballGameAction): number => {
-  if (action.type !== 'RECORD_ACTION') return 0;
-  
+const calculateScore = (_state: FootballGameState, action: FootballGameAction): number => {
+  if (action.type !== 'RECORD_ACTION' || !action.event) return 0;
+
   switch (action.event.action) {
-    case 'TOUCHDOWN':
-      return 6;
-    case 'FIELD_GOAL':
-      return 3;
-    case 'EXTRA_POINT':
-      return 1;
-    case 'POINT_ADJUSTMENT':
-      return -1;
-    default:
-      return 0;
+    case 'TOUCHDOWN': return 6;
+    case 'FIELD_GOAL': return 3;
+    case 'EXTRA_POINT': return 1;
+    case 'POINT_ADJUSTMENT': return -1;
+    default: return 0;
   }
 };
 
@@ -80,7 +75,7 @@ const footballGameReducer = createSportsGameReducer<FootballGameState, FootballG
 );
 
 const initialState = {
-  ...createInitialState('quarter', 900),
+  ...createInitialState(900),
   gameMode: 'FIRST_TO_21' as FootballGameMode,
   targetScore: 21,
   homeTeam: {

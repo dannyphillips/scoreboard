@@ -82,7 +82,7 @@ function PlayerSelectionModal({
       id: editingPlayer?.id || `player-${Date.now()}`,
       name: name.trim(),
       color: selectedColor,
-      createdAt: editingPlayer?.createdAt || new Date()
+      createdAt: editingPlayer?.createdAt || new Date().toISOString()
     };
 
     onSelect(player);

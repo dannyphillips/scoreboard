@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { YahtzeePlayer, YahtzeeCategory, YahtzeeGameState } from '../../types';
+import { YahtzeePlayer, YahtzeeCategory, YahtzeeGameState, YahtzeeScore } from '../../types';
 import { createPlayer, updatePlayer, deletePlayer, getPlayer, updateGameHistory } from '../../services/playerService';
 
 type YahtzeeAction =
@@ -17,7 +17,7 @@ const initialState: YahtzeeGameState = {
   players: [],
   scores: {},
   currentTurn: 0,
-  gameStarted: false,
+  isGameStarted: false,
   isGameOver: false,
   dice: [1, 1, 1, 1, 1],
 };
@@ -36,23 +36,24 @@ function yahtzeeGameReducer(state: YahtzeeGameState, action: YahtzeeAction): Yah
   switch (action.type) {
     case 'ADD_PLAYER':
       // Check if player is already in the game
-      if (state.players.some(p => p.id === action.player.id)) {
+      if (state.players.some((p: YahtzeePlayer) => p.id === action.player.id)) {
         return state;
       }
 
       return {
         ...state,
         players: [...state.players, action.player],
+        isGameStarted: false,
         scores: {
           ...state.scores,
-          [action.player.id]: initializePlayerScores(),
-        },
+          [action.player.id]: initializePlayerScores()
+        }
       };
 
     case 'UPDATE_PLAYER':
       return {
         ...state,
-        players: state.players.map(p =>
+        players: state.players.map((p: YahtzeePlayer) =>
           p.id === action.player.id ? action.player : p
         ),
       };
@@ -61,7 +62,7 @@ function yahtzeeGameReducer(state: YahtzeeGameState, action: YahtzeeAction): Yah
       const { [action.playerId]: removedScores, ...remainingScores } = state.scores;
       return {
         ...state,
-        players: state.players.filter(p => p.id !== action.playerId),
+        players: state.players.filter((p: YahtzeePlayer) => p.id !== action.playerId),
         scores: remainingScores,
         currentTurn: state.currentTurn >= state.players.length - 1 ? 0 : state.currentTurn,
       };
@@ -84,15 +85,16 @@ function yahtzeeGameReducer(state: YahtzeeGameState, action: YahtzeeAction): Yah
 
     case 'START_GAME':
       // Initialize scores for all players if not already initialized
-      const initializedScores = state.players.reduce((scores, player) => ({
+      const initializedScores = state.players.reduce((scores: Record<string, YahtzeeScore>, player: YahtzeePlayer) => ({
         ...scores,
         [player.id]: state.scores[player.id] || initializePlayerScores(),
       }), {});
 
       return {
         ...state,
+        isGameStarted: true,
         scores: initializedScores,
-        gameStarted: true,
+        currentTurn: 0
       };
 
     case 'NEXT_TURN':
@@ -104,12 +106,12 @@ function yahtzeeGameReducer(state: YahtzeeGameState, action: YahtzeeAction): Yah
     case 'END_GAME':
       return {
         ...state,
-        gameStarted: false,
+        isGameStarted: false,
       };
 
     case 'RESET_GAME':
       // Keep players but reset their scores
-      const resetScores = state.players.reduce((scores, player) => ({
+      const resetScores = state.players.reduce((scores: Record<string, YahtzeeScore>, player: YahtzeePlayer) => ({
         ...scores,
         [player.id]: initializePlayerScores(),
       }), {});
@@ -117,16 +119,17 @@ function yahtzeeGameReducer(state: YahtzeeGameState, action: YahtzeeAction): Yah
       return {
         ...initialState,
         players: state.players,
+        isGameStarted: false,
+        isGameOver: false,
         scores: resetScores,
+        currentTurn: 0
       };
 
     case 'LOAD_GAME':
       return {
+        ...state,
         ...action.state,
-        players: action.state.players,
-        scores: action.state.scores,
-        currentTurn: action.state.currentTurn,
-        gameStarted: action.state.gameStarted
+        isGameStarted: action.state.isGameStarted
       };
 
     default:
@@ -161,9 +164,9 @@ export function YahtzeeGameProvider({ children }: { children: React.ReactNode })
             break;
 
           case 'END_GAME':
-            await Promise.all(state.players.map(async (player) => {
+            await Promise.all(state.players.map(async (player: YahtzeePlayer) => {
               const playerScores = state.scores[player.id] || initializePlayerScores();
-              const totalScore = Object.values(playerScores).reduce((sum, score) => sum + score, 0);
+              const totalScore = Object.values(playerScores).reduce((sum: number, score: number) => sum + score, 0);
               
               await updateGameHistory({
                 gameId: 'yahtzee',
@@ -171,7 +174,8 @@ export function YahtzeeGameProvider({ children }: { children: React.ReactNode })
                 playerId: player.id,
                 score: totalScore,
                 rank: 0,
-                playedAt: new Date()
+                playedAt: new Date().toISOString(),
+                date: new Date().toISOString()
               });
             }));
             dispatch(pendingAction);

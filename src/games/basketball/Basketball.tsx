@@ -79,7 +79,7 @@ export default function Basketball() {
         settings: {
           homeTeam: state.homeTeam,
           awayTeam: state.awayTeam,
-          timeLength: state.timeRemaining ?? 900,
+          timeLength: state.timeRemaining,
           finalScore: getFinalScore() ?? 21
         },
         onSave: handleSettingsSave,

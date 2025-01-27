@@ -5,6 +5,7 @@ import { TIME_PRESETS, SCORE_PRESETS } from './types';
 import GameSettings from './GameSettings';
 import { ScoringOption } from '../sports/SportsGame';
 import { TEAM_PRESETS } from '../sports/teamPresets';
+import { FootballGameSettings } from './types';
 
 const DEFAULT_TARGET_SCORE = 21;
 
@@ -37,15 +38,6 @@ const getGameModeForScore = (score: number): FootballGameState['gameMode'] => {
 export default function Football() {
   const { state, dispatch } = useFootballGame();
 
-  const getFinalScore = () => {
-    switch (state.gameMode) {
-      case 'FIRST_TO_21': return 21;
-      case 'FIRST_TO_28': return 28;
-      case 'FIRST_TO_35': return 35;
-      default: return DEFAULT_TARGET_SCORE;
-    }
-  };
-
   const getTeamPreset = (teamId: string) => {
     return TEAM_PRESETS.find(preset => preset.id === teamId) || TEAM_PRESETS[0];
   };
@@ -53,40 +45,33 @@ export default function Football() {
   const homeTeamPreset = getTeamPreset(state.homeTeam.id);
   const awayTeamPreset = getTeamPreset(state.awayTeam.id);
 
-  const handleSettingsSave = (settings: any) => {
-    // Ensure we have a valid target score
-    const targetScore = settings.finalScore || DEFAULT_TARGET_SCORE;
-    
+  const handleSettingsSave = (settings: FootballGameSettings) => {
+    const targetScore = settings.finalScore ?? DEFAULT_TARGET_SCORE;
     const newState = {
       ...state,
       gameMode: getGameModeForScore(targetScore),
-      targetScore: targetScore, // Set the target score explicitly
+      targetScore,
       settings: {
         ...settings,
-        finalScore: targetScore // Ensure finalScore is also set in settings
+        finalScore: targetScore
       },
       timeRemaining: settings.timeLength,
       homeTeam: {
-        ...state.homeTeam,
         ...settings.homeTeam,
-        name: settings.homeTeam.name || homeTeamPreset.name,
-        score: 0
+        score: 0,
+        timeouts: 3
       },
       awayTeam: {
-        ...state.awayTeam,
         ...settings.awayTeam,
-        name: settings.awayTeam.name || awayTeamPreset.name,
-        score: 0
+        score: 0,
+        timeouts: 3
       },
-      isGameStarted: false,
       isPaused: true,
       isGameOver: false
     } as FootballGameState;
 
-    dispatch({ 
-      type: 'LOAD_GAME', 
-      state: newState
-    } as FootballGameAction);
+    console.log('New state to be dispatched:', newState);
+    dispatch({ type: 'LOAD_GAME', state: newState });
   };
 
   return (

@@ -32,7 +32,7 @@ function PlayerDetails() {
         if (playerData) {
           setPlayer(playerData);
           setGameHistory(history);
-          setPlayerStats(stats.filter(stat => stat.playerId === id));
+          setPlayerStats(stats.filter((stat: { playerId: string }) => stat.playerId === id));
         } else {
           setError('Player not found');
         }

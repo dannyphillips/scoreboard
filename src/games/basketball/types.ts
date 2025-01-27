@@ -12,7 +12,7 @@ export interface BasketballGameSettings extends GameSettings {
 
 export interface BasketballGameState {
   gameMode: GameMode;
-  timeRemaining: number | null;
+  timeRemaining: number;
   isGameStarted: boolean;
   isPaused: boolean;
   isGameOver: boolean;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SportsGameState, SportsGameAction, Team } from './SportsGameContext';
+import { SportsGameState, SportsGameAction } from './SportsGameContext';
 import Scoreboard from './Scoreboard';
 import { ScoringActionType } from '../../types';
 import { GameSettings } from './SportsGameSettings';
@@ -80,21 +80,36 @@ export default function SportsGame<T extends SportsGameState, A extends SportsGa
     return state.homeTeam.score > state.awayTeam.score ? state.homeTeam : state.awayTeam;
   };
 
+  const handleSettingsSave = (settings: GameSettings) => {
+    const newState: T = {
+      ...state,
+      settings,
+      timeRemaining: settings.timeLength,
+      homeTeam: {
+        ...settings.homeTeam,
+        score: 0,
+        timeouts: 3
+      },
+      awayTeam: {
+        ...settings.awayTeam,
+        score: 0,
+        timeouts: 3
+      },
+      isPaused: true,
+      isGameOver: false
+    };
+
+    dispatch({
+      type: 'LOAD_GAME',
+      state: newState
+    } as unknown as A);
+  };
+
   if (!state.isGameStarted) {
     return (
       <GameSettings
         {...settingsProps}
-        onSave={(settings: GameSettings) => {
-          dispatch({ 
-            type: 'LOAD_GAME', 
-            state: {
-              ...state,
-              homeTeam: settings.homeTeam as Team,
-              awayTeam: settings.awayTeam as Team,
-              timeRemaining: settings.timeLength,
-            }
-          } as A)
-        }}
+        onSave={handleSettingsSave}
         onStart={() => dispatch({ type: 'START_GAME', gameMode: state.gameMode } as A)}
         isStarted={state.isGameStarted}
       />
