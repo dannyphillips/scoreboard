@@ -8,7 +8,15 @@ const urlsToCache = [
   '/scoreboard/images/teams/away-team.png',
   '/scoreboard/images/games/basketball-card.jpg',
   '/scoreboard/images/games/football-card.jpg',
-  '/scoreboard/images/games/yahtzee-card.jpg'
+  '/scoreboard/images/games/yahtzee-card.jpg',
+  '/scoreboard/images/icons/icon-72x72.png',
+  '/scoreboard/images/icons/icon-96x96.png',
+  '/scoreboard/images/icons/icon-128x128.png',
+  '/scoreboard/images/icons/icon-144x144.png',
+  '/scoreboard/images/icons/icon-152x152.png',
+  '/scoreboard/images/icons/icon-192x192.png',
+  '/scoreboard/images/icons/icon-384x384.png',
+  '/scoreboard/images/icons/icon-512x512.png'
 ];
 
 self.addEventListener('install', (event) => {
