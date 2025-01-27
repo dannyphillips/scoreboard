@@ -31,26 +31,11 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Debug Env
-        run: |
-          echo "Checking environment variables..."
-          echo "VITE_FIREBASE_API_KEY set: ${{ secrets.VITE_FIREBASE_API_KEY != '' }}"
-          echo "VITE_FIREBASE_AUTH_DOMAIN set: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN != '' }}"
-          echo "VITE_FIREBASE_PROJECT_ID set: ${{ secrets.VITE_FIREBASE_PROJECT_ID != '' }}"
-          echo "VITE_FIREBASE_APP_ID set: ${{ secrets.VITE_FIREBASE_APP_ID != '' }}"
-
-      - name: Create env file
-        run: |
-          echo "VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }}" >> .env.production
-          echo "VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}" >> .env.production
-          echo "VITE_FIREBASE_PROJECT_ID=${{ secrets.VITE_FIREBASE_PROJECT_ID }}" >> .env.production
-          echo "VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }}" >> .env.production
-          echo "Env file created:"
-          cat .env.production | sed 's/=.*/=REDACTED/'
-
       - name: Build
         run: bun run build
         env:
+          NODE_ENV: production
+          VITE_BASE_URL: /scoreboard/
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
@@ -73,4 +58,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 
+        uses: actions/deploy-pages@v4
