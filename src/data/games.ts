@@ -40,5 +40,25 @@ export const GAMES: Record<string, Game> = {
       'Game clock with automatic timeouts',
       'Dark mode support'
     ]
+  },
+  football: {
+    id: 'football',
+    name: 'Football',
+    description: 'Track football game scores with touchdowns, field goals, and more',
+    image: '/images/games/football-card.jpg',
+    rules: [
+      'Score touchdowns (6 points)',
+      'Kick field goals (3 points)',
+      'Convert extra points (1 point)',
+      'Track timeouts and possession',
+      'Monitor game clock and quarters'
+    ],
+    features: [
+      'Real-time scoring',
+      'Team management',
+      'Game clock with quarters',
+      'Timeout tracking',
+      'Dark mode support'
+    ]
   }
 }; 
