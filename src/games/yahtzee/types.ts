@@ -27,6 +27,7 @@ export interface YahtzeeGameState {
   currentTurn: number;
   isGameStarted: boolean;
   isGameOver: boolean;
+  dice: number[];
 }
 
 export type YahtzeeCategory = keyof YahtzeeScore;
@@ -36,4 +37,5 @@ export interface YahtzeeCategoryConfig {
   description: string;
   maxScore: number;
   section: 'upper' | 'lower';
+  calculatePossibleScores: (dice: number[]) => number[];
 } 

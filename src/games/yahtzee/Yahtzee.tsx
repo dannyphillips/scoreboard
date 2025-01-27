@@ -5,13 +5,13 @@ import { useYahtzeeGame } from './YahtzeeContext';
 interface ScoreGridProps {
   players: YahtzeePlayer[];
   scores: Record<string, Record<YahtzeeCategory, number>>;
-  onScoreSelect: (playerId: string, category: YahtzeeCategory, value: number) => void;
+  onScore: (category: YahtzeeCategory) => void;
   onAddPlayer: () => void;
   onEditPlayer: (player: YahtzeePlayer) => void;
   dice: number[];
 }
 
-function ScoreGrid({ players, scores, onScoreSelect, onAddPlayer, onEditPlayer, dice }: ScoreGridProps) {
+function ScoreGrid({ players, scores, onScore, onAddPlayer, onEditPlayer, dice }: ScoreGridProps) {
   const renderScoreCell = (playerId: string, category: YahtzeeCategory) => {
     const score = scores[playerId]?.[category];
     if (score !== undefined) {
@@ -21,7 +21,7 @@ function ScoreGrid({ players, scores, onScoreSelect, onAddPlayer, onEditPlayer, 
     const possibleScores = YAHTZEE_CATEGORIES[category].calculatePossibleScores(dice);
     return (
       <button
-        onClick={() => onScoreSelect(playerId, category, possibleScores[0] || 0)}
+        onClick={() => onScore(category)}
         className="w-full h-full flex items-center justify-center hover:bg-gray-100"
       >
         {possibleScores[0] || 0}
@@ -102,7 +102,7 @@ function ScoreGrid({ players, scores, onScoreSelect, onAddPlayer, onEditPlayer, 
   );
 }
 
-function Yahtzee() {
+export default function Yahtzee() {
   const { state, dispatch } = useYahtzeeGame();
 
   const handleAddPlayer = () => {
@@ -114,25 +114,41 @@ function Yahtzee() {
     console.log(player);
   };
 
-  const handleScoreSelect = (playerId: string, category: YahtzeeCategory, value: number) => {
-    dispatch({
-      type: 'ADD_SCORE',
-      score: { playerId, category, value }
-    });
+  const handleScore = (category: YahtzeeCategory) => {
+    if (!state.dice) return;
+
+    const possibleScores = YAHTZEE_CATEGORIES[category].calculatePossibleScores(state.dice);
+    if (possibleScores.length > 0) {
+      dispatch({
+        type: 'ADD_SCORE',
+        score: {
+          playerId: state.players[state.currentTurn].id,
+          category,
+          value: possibleScores[0]
+        }
+      });
+    }
   };
+
+  // Convert YahtzeeScore to Record<YahtzeeCategory, number>
+  const convertedScores: Record<string, Record<YahtzeeCategory, number>> = {};
+  Object.entries(state.scores).forEach(([playerId, score]) => {
+    convertedScores[playerId] = Object.entries(score).reduce((acc, [category, value]) => ({
+      ...acc,
+      [category]: value ?? 0
+    }), {} as Record<YahtzeeCategory, number>);
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
       <ScoreGrid
         players={state.players}
-        scores={state.scores}
-        onScoreSelect={handleScoreSelect}
+        scores={convertedScores}
+        onScore={handleScore}
         onAddPlayer={handleAddPlayer}
         onEditPlayer={handleEditPlayer}
         dice={state.dice}
       />
     </div>
   );
-}
-
-export default Yahtzee; 
+} 

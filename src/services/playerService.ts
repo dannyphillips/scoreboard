@@ -11,7 +11,7 @@ export const createPlayer = async (player: Omit<Player, 'id' | 'createdAt'>): Pr
   const newPlayer = {
     ...player,
     id: generateId(),
-    createdAt: new Date()
+    createdAt: new Date().toISOString()
   };
   
   await setDoc(doc(db, PLAYERS_COLLECTION, newPlayer.id), newPlayer);
@@ -60,7 +60,14 @@ export const deletePlayer = async (playerId: string): Promise<void> => {
 export const getPlayer = async (id: string): Promise<Player | null> => {
   const playerDoc = await getDoc(doc(db, PLAYERS_COLLECTION, id));
   if (!playerDoc.exists()) return null;
-  return { ...playerDoc.data(), id: playerDoc.id } as Player;
+  const data = playerDoc.data();
+  const player = {
+    id: playerDoc.id,
+    name: data.name,
+    color: data.color,
+    createdAt: data.createdAt.toISOString()
+  } as Player;
+  return player;
 };
 
 export const getAllPlayers = async (): Promise<Player[]> => {
@@ -91,7 +98,8 @@ export async function getPlayerStats(): Promise<PlayerStats[]> {
       highScore: data.highScore,
       gamesPlayed: data.gamesPlayed,
       averageScore: data.averageScore,
-      lastPlayed: data.lastPlayed.toDate(),
+      lastPlayed: data.lastPlayed.toISOString(),
+      wins: data.wins || 0
     } as PlayerStats;
   });
 }

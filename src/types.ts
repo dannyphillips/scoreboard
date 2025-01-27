@@ -116,4 +116,6 @@ export interface Team {
   score: number;
   timeouts: number;
   players: Player[];
-} 
+}
+
+export type { YahtzeePlayer, YahtzeeCategory, YahtzeeGameState, YahtzeeCategoryConfig, YahtzeeScore } from './games/yahtzee/types'; 
