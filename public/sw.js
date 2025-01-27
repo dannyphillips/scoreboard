@@ -1,14 +1,14 @@
 const CACHE_NAME = 'scoreboard-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/images/logo-light.png',
-  '/images/teams/home-team.png',
-  '/images/teams/away-team.png',
-  '/images/games/basketball-card.jpg',
-  '/images/games/football-card.jpg',
-  '/images/games/yahtzee-card.jpg'
+  '/scoreboard/',
+  '/scoreboard/index.html',
+  '/scoreboard/manifest.json',
+  '/scoreboard/images/logo-light.png',
+  '/scoreboard/images/teams/home-team.png',
+  '/scoreboard/images/teams/away-team.png',
+  '/scoreboard/images/games/basketball-card.jpg',
+  '/scoreboard/images/games/football-card.jpg',
+  '/scoreboard/images/games/yahtzee-card.jpg'
 ];
 
 self.addEventListener('install', (event) => {
