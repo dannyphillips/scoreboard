@@ -1,5 +1,5 @@
-import { YahtzeePlayer, YahtzeeScore } from '../types/yahtzee';
-import { YAHTZEE_CATEGORIES } from '../games/yahtzee/yahtzeeConfig';
+import { YahtzeePlayer, YahtzeeScore } from '../../types/yahtzee';
+import { YAHTZEE_CATEGORIES } from './yahtzeeConfig';
 import { motion } from 'framer-motion';
 
 interface GameSummaryProps {

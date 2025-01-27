@@ -1,0 +1,5 @@
+[test]
+environment = "jsdom"
+coverage = true
+timeout = 10_000
+jsx = true 
