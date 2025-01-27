@@ -5,7 +5,7 @@ import { resolve } from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: process.env.NODE_ENV === 'production' ? '/scoreboard/' : '/',
+  base: process.env.VITE_BASE_URL || '/',
   server: {
     port: 5173
   },
