@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import { SportsGameState, SportsGameAction, createGameContext, createSportsGameReducer, createGameProvider, createInitialState } from '../sports/SportsGameContext';
 import { FootballGameMode } from './types';
+import { TEAM_PRESETS } from '../sports/teamPresets';
 
 export interface FootballGameState extends SportsGameState {
   gameMode: FootballGameMode;
@@ -82,21 +83,41 @@ const initialState = {
   ...createInitialState('quarter', 900),
   gameMode: 'FIRST_TO_21' as FootballGameMode,
   targetScore: 21,
+  homeTeam: {
+    id: TEAM_PRESETS[0].id,
+    name: TEAM_PRESETS[0].name,
+    color: TEAM_PRESETS[0].color,
+    logo: TEAM_PRESETS[0].logo,
+    score: 0,
+    timeouts: 3,
+    players: []
+  },
+  awayTeam: {
+    id: TEAM_PRESETS[1].id,
+    name: TEAM_PRESETS[1].name,
+    color: TEAM_PRESETS[1].color,
+    logo: TEAM_PRESETS[1].logo,
+    score: 0,
+    timeouts: 3,
+    players: []
+  },
   settings: {
     timeLength: 900,
     finalScore: 21,
     homeTeam: {
-      id: 'home',
-      name: 'Home Team',
-      color: '#FF4136',
+      id: TEAM_PRESETS[0].id,
+      name: TEAM_PRESETS[0].name,
+      color: TEAM_PRESETS[0].color,
+      logo: TEAM_PRESETS[0].logo,
       score: 0,
       timeouts: 3,
       players: []
     },
     awayTeam: {
-      id: 'away',
-      name: 'Away Team',
-      color: '#0074D9',
+      id: TEAM_PRESETS[1].id,
+      name: TEAM_PRESETS[1].name,
+      color: TEAM_PRESETS[1].color,
+      logo: TEAM_PRESETS[1].logo,
       score: 0,
       timeouts: 3,
       players: []

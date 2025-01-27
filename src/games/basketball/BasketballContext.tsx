@@ -2,6 +2,7 @@ import React from 'react';
 import { createGameContext, createGameProvider, createSportsGameReducer, SportsGameAction } from '../sports/SportsGameContext';
 import { BasketballGameState } from './types';
 import { GAME_MODES } from './basketballConfig';
+import { TEAM_PRESETS } from '../sports/teamPresets';
 
 // Initial state for a new game
 const initialState: BasketballGameState = {
@@ -11,17 +12,19 @@ const initialState: BasketballGameState = {
   isPaused: false,
   isGameOver: false,
   homeTeam: {
-    id: 'home-team',
-    name: 'Home Team',
-    color: '#FF4136',
+    id: TEAM_PRESETS[0].id,
+    name: TEAM_PRESETS[0].name,
+    color: TEAM_PRESETS[0].color,
+    logo: TEAM_PRESETS[0].logo,
     score: 0,
     timeouts: 2,
     players: [],
   },
   awayTeam: {
-    id: 'away-team',
-    name: 'Away Team',
-    color: '#0074D9',
+    id: TEAM_PRESETS[1].id,
+    name: TEAM_PRESETS[1].name,
+    color: TEAM_PRESETS[1].color,
+    logo: TEAM_PRESETS[1].logo,
     score: 0,
     timeouts: 2,
     players: [],
@@ -30,6 +33,28 @@ const initialState: BasketballGameState = {
   shotClock: null,
   quarter: 1,
   gameEvents: [],
+  settings: {
+    timeLength: 900,
+    finalScore: 21,
+    homeTeam: {
+      id: TEAM_PRESETS[0].id,
+      name: TEAM_PRESETS[0].name,
+      color: TEAM_PRESETS[0].color,
+      logo: TEAM_PRESETS[0].logo,
+      score: 0,
+      timeouts: 2,
+      players: [],
+    },
+    awayTeam: {
+      id: TEAM_PRESETS[1].id,
+      name: TEAM_PRESETS[1].name,
+      color: TEAM_PRESETS[1].color,
+      logo: TEAM_PRESETS[1].logo,
+      score: 0,
+      timeouts: 2,
+      players: [],
+    }
+  }
 };
 
 // Action types

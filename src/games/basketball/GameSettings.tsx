@@ -29,14 +29,18 @@ export default function GameSettings({
   };
 
   const handleTeamSelect = (team: 'home' | 'away', preset: typeof TEAM_PRESETS[0]) => {
-    setLocalSettings(prev => ({
-      ...prev,
+    const newSettings = {
+      ...localSettings,
       [team === 'home' ? 'homeTeam' : 'awayTeam']: {
-        ...prev[team === 'home' ? 'homeTeam' : 'awayTeam'],
+        ...localSettings[team === 'home' ? 'homeTeam' : 'awayTeam'],
+        id: preset.id,
         name: preset.name,
-        color: preset.color
+        color: preset.color,
+        logo: preset.logo
       }
-    }));
+    };
+    setLocalSettings(newSettings);
+    onSave(newSettings);
   };
 
   const handleAddPlayer = (team: 'home' | 'away') => {

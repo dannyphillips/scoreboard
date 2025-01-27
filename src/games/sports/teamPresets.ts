@@ -2,6 +2,18 @@ import { TeamPreset } from './SportsGameSettings';
 
 export const TEAM_PRESETS: TeamPreset[] = [
   {
+    id: 'home',
+    name: 'Home Team',
+    color: '#4A90E2',
+    logo: '/images/teams/home-team.png'
+  },
+  {
+    id: 'away',
+    name: 'Away Team',
+    color: '#E24A4A',
+    logo: '/images/teams/away-team.png'
+  },
+  {
     id: 'red-hawks',
     name: 'Red Hawks',
     color: '#FF4136',
@@ -72,5 +84,17 @@ export const TEAM_PRESETS: TeamPreset[] = [
     name: 'Silver Sharks',
     color: '#C0C0C0',
     logo: '/images/teams/silver-sharks.png'
+  },
+  {
+    id: 'navy-narwhals',
+    name: 'Navy Narwhals',
+    color: '#001F3F',
+    logo: '/images/teams/navy-narwhals.png'
+  },
+  {
+    id: 'brown-badgers',
+    name: 'Brown Badgers',
+    color: '#8B4513',
+    logo: '/images/teams/brown-badgers.png'
   }
 ]; 

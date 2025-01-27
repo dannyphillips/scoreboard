@@ -3,7 +3,7 @@ import { GameSettings } from '../sports/SportsGameSettings';
 import { GameMode, ScoringActionType } from '../../types';
 
 export interface BasketballTeam extends Team {
-  // Add any basketball-specific team properties here
+  logo?: string;
 }
 
 export interface BasketballGameSettings extends GameSettings {

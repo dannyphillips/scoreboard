@@ -5,6 +5,7 @@ export interface Team {
   id: string;
   name: string;
   color: string;
+  logo?: string;
   score: number;
   timeouts: number;
   players: BasePlayer[];

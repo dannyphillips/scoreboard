@@ -31,14 +31,34 @@ export default function Basketball() {
   };
 
   const handleSettingsSave = (settings: any) => {
+    // Find the team presets based on the selected team colors
+    const homeTeamPreset = TEAM_PRESETS.find(t => t.color === settings.homeTeam.color);
+    const awayTeamPreset = TEAM_PRESETS.find(t => t.color === settings.awayTeam.color);
+
     dispatch({ 
       type: 'LOAD_GAME', 
       state: {
         ...state,
-        homeTeam: settings.homeTeam,
-        awayTeam: settings.awayTeam,
+        homeTeam: {
+          ...settings.homeTeam,
+          logo: homeTeamPreset?.logo || '/images/teams/home-team.png'
+        },
+        awayTeam: {
+          ...settings.awayTeam,
+          logo: awayTeamPreset?.logo || '/images/teams/away-team.png'
+        },
         timeRemaining: settings.timeLength,
-        settings
+        settings: {
+          ...settings,
+          homeTeam: {
+            ...settings.homeTeam,
+            logo: homeTeamPreset?.logo || '/images/teams/home-team.png'
+          },
+          awayTeam: {
+            ...settings.awayTeam,
+            logo: awayTeamPreset?.logo || '/images/teams/away-team.png'
+          }
+        }
       }
     });
   };
