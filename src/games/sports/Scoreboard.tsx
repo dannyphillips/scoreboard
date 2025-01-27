@@ -85,7 +85,7 @@ export default function Scoreboard({
       <img 
         src={team.logo || defaultTeamLogos[side]} 
         alt={team.name}
-        className="w-16 h-16 sm:w-24 md:w-32 sm:h-24 md:h-32 object-contain mb-2 sm:mb-4"
+        className="w-12 h-12 sm:w-16 md:w-24 sm:h-16 md:h-24 object-contain mb-2 sm:mb-4"
       />
       <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 sm:mb-4">{team.name}</h2>
       <div className="text-4xl sm:text-5xl md:text-[6rem] font-['Wallpoet'] text-white leading-none">
@@ -97,7 +97,7 @@ export default function Scoreboard({
           <button
             key={option.points}
             onClick={() => onAddPoints(side, option.points)}
-            className={`bg-gray-700 text-white w-12 h-12 sm:w-16 sm:h-16 rounded-full hover:bg-gray-600 text-xl sm:text-2xl ${
+            className={`bg-gray-700 text-white w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-full hover:bg-gray-600 text-lg sm:text-xl md:text-2xl ${
               option.color ? `bg-${option.color}` : ''
             }`}
           >
