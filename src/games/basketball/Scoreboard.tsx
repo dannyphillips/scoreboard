@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BasketballTeam, TEAM_PRESETS } from './types';
+import { BasketballTeam } from './types';
+import { TEAM_PRESETS } from '../sports/teamPresets';
 import { useNavigate } from 'react-router-dom';
 
 interface ScoreboardProps {
@@ -107,7 +108,7 @@ export default function Scoreboard({
           {/* Home Team */}
           <div className="flex flex-col items-center">
             <img 
-              src={TEAM_PRESETS.find(t => t.color === homeTeam.color)?.logo || '/images/teams/home-team.png'} 
+              src={TEAM_PRESETS.find((t: typeof TEAM_PRESETS[0]) => t.color === homeTeam.color)?.logo || '/images/teams/home-team.png'} 
               alt={homeTeam.name}
               className="w-16 h-16 sm:w-24 md:w-32 sm:h-24 md:h-32 object-contain mb-2 sm:mb-4"
             />
@@ -177,7 +178,7 @@ export default function Scoreboard({
           {/* Away Team */}
           <div className="flex flex-col items-center">
             <img 
-              src={TEAM_PRESETS.find(t => t.color === awayTeam.color)?.logo || '/images/teams/away-team.png'} 
+              src={TEAM_PRESETS.find((t: typeof TEAM_PRESETS[0]) => t.color === awayTeam.color)?.logo || '/images/teams/away-team.png'} 
               alt={awayTeam.name}
               className="w-16 h-16 sm:w-24 md:w-32 sm:h-24 md:h-32 object-contain mb-2 sm:mb-4"
             />

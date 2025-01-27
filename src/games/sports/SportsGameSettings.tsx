@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { Team } from './SportsGameContext';
 
 export interface GameSettings {
@@ -25,28 +23,21 @@ export interface Preset {
 interface SportsGameSettingsProps {
   settings: GameSettings;
   onSave: (settings: GameSettings) => void;
-  onStart: () => void;
-  isStarted: boolean;
   teamPresets: TeamPreset[];
   timePresets: Preset[];
   scorePresets: Preset[];
   sportName: string;
-  defaultLogo: string;
 }
 
 export default function SportsGameSettings({
   settings,
   onSave,
-  onStart,
-  isStarted,
   teamPresets,
   timePresets,
   scorePresets,
-  sportName,
-  defaultLogo
+  sportName
 }: SportsGameSettingsProps) {
   const [localSettings, setLocalSettings] = useState<GameSettings>(settings);
-  const navigate = useNavigate();
 
   const handleTeamChange = (team: 'home' | 'away', preset: TeamPreset) => {
     const teamKey = `${team}Team` as keyof GameSettings;
@@ -190,17 +181,6 @@ export default function SportsGameSettings({
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Start Button */}
-        <div className="flex justify-end">
-          <button
-            onClick={onStart}
-            disabled={isStarted}
-            className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Start Game
-          </button>
         </div>
       </div>
     </div>

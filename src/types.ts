@@ -38,7 +38,7 @@ export interface GameEvent {
 
 export interface GameState {
   gameMode: GameMode;
-  timeRemaining: number | null;
+  timeRemaining: number;
   isGameStarted: boolean;
   isPaused: boolean;
   isGameOver: boolean;
@@ -62,4 +62,58 @@ export interface GameState {
   shotClock: number | null;
   quarter: number;
   gameEvents: GameEvent[];
+}
+
+export interface Player {
+  id: string;
+  name: string;
+  color: string;
+  createdAt?: string;
+}
+
+export interface Game {
+  id: string;
+  name: string;
+  path: string;
+  icon: string;
+  imageUrl: string;
+  scoreType: string;
+  description: string;
+}
+
+export interface GameHistory {
+  id: string;
+  gameId: string;
+  playerId: string;
+  gameName: string;
+  score: number;
+  date: string;
+  playedAt: string;
+  rank: number;
+}
+
+export interface PlayerStats {
+  playerId: string;
+  gameId: string;
+  gamesPlayed: number;
+  wins: number;
+  highScore: number;
+  averageScore: number;
+}
+
+export interface GameSettings {
+  timeLength: number;
+  finalScore: number | null;
+  homeTeam: Team;
+  awayTeam: Team;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  color: string;
+  logo?: string;
+  score: number;
+  timeouts: number;
+  players: Player[];
 } 

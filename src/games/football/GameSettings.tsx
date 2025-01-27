@@ -10,14 +10,12 @@ interface GameSettingsProps {
   settings: FootballGameSettings;
   onSave: (settings: FootballGameSettings) => void;
   onStart: () => void;
-  isStarted: boolean;
 }
 
 export default function GameSettings({
   settings,
   onSave,
   onStart,
-  isStarted
 }: GameSettingsProps) {
   const [localSettings, setLocalSettings] = useState<FootballGameSettings>(settings);
   const [showPlayerModal, setShowPlayerModal] = useState(false);
@@ -30,14 +28,17 @@ export default function GameSettings({
     onStart();
   };
 
-  const handleTeamChange = (team: 'home' | 'away', preset: typeof TEAM_PRESETS[0]) => {
+  const handleTeamSelect = (team: 'home' | 'away', preset: typeof TEAM_PRESETS[0]) => {
+    const teamKey = team === 'home' ? 'homeTeam' : 'awayTeam';
+    const currentTeam = localSettings[teamKey];
     const newSettings = {
       ...localSettings,
-      [`${team}Team`]: {
-        ...localSettings[`${team}Team` as keyof FootballGameSettings],
+      [teamKey]: {
+        ...currentTeam,
         id: preset.id,
         name: preset.name,
-        color: preset.color
+        color: preset.color,
+        logo: preset.logo
       }
     };
     setLocalSettings(newSettings);
@@ -122,7 +123,7 @@ export default function GameSettings({
                     <button
                       key={preset.id}
                       type="button"
-                      onClick={() => handleTeamChange('home', preset)}
+                      onClick={() => handleTeamSelect('home', preset)}
                       className={`aspect-square rounded-lg transition-all overflow-hidden relative ${
                         localSettings.homeTeam.id === preset.id
                           ? 'ring-4 ring-white scale-105'
@@ -250,7 +251,7 @@ export default function GameSettings({
                     <button
                       key={preset.id}
                       type="button"
-                      onClick={() => handleTeamChange('away', preset)}
+                      onClick={() => handleTeamSelect('away', preset)}
                       className={`aspect-square rounded-lg transition-all overflow-hidden relative ${
                         localSettings.awayTeam.id === preset.id
                           ? 'ring-4 ring-white scale-105'

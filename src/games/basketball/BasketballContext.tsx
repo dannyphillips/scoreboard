@@ -61,7 +61,7 @@ const initialState: BasketballGameState = {
 export type BasketballGameAction = SportsGameAction;
 
 // Calculate score based on action type
-const calculateScore = (state: BasketballGameState, action: BasketballGameAction): number => {
+const calculateScore = (_state: BasketballGameState, action: BasketballGameAction): number => {
   if (action.type !== 'RECORD_ACTION' || !action.event) return 0;
 
   switch (action.event.action) {
