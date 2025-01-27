@@ -7,13 +7,19 @@ export interface BasePlayer {
 
 export type TeamSide = 'HOME' | 'AWAY';
 
-export type GameMode = 'TIMED_GAME' | 'TOURNAMENT' | 'FIRST_TO_21' | 'FIRST_TO_28' | 'FIRST_TO_35';
+export type GameMode = 'TIMED_GAME' | 'TOURNAMENT' | 'FIRST_TO_11' | 'FIRST_TO_21' | 'FIRST_TO_28' | 'FIRST_TO_35';
 
-export type ScoringActionType = 
-  | 'TOUCHDOWN'
-  | 'FIELD_GOAL'
-  | 'EXTRA_POINT'
-  | 'POINT_ADJUSTMENT';
+// Base scoring action type
+export type BaseScoringActionType = 'POINT_ADJUSTMENT';
+
+// Football-specific scoring actions
+export type FootballScoringActionType = BaseScoringActionType | 'TOUCHDOWN' | 'FIELD_GOAL' | 'EXTRA_POINT';
+
+// Basketball-specific scoring actions
+export type BasketballScoringActionType = BaseScoringActionType | 'THREE_POINTER' | 'TWO_POINTER' | 'FREE_THROW' | 'FOUL' | 'ASSIST' | 'REBOUND' | 'BLOCK' | 'STEAL';
+
+// Use this type for the shared sports components
+export type ScoringActionType = FootballScoringActionType | BasketballScoringActionType;
 
 export interface ScoringAction {
   type: ScoringActionType;

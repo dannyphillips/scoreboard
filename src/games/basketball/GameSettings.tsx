@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BasketballGameSettings, TIME_PRESETS, SCORE_PRESETS, TEAM_PRESETS } from './types';
+import { BasketballGameSettings, TIME_PRESETS, SCORE_PRESETS } from './types';
+import { TEAM_PRESETS } from '../sports/teamPresets';
 import PlayerSelectionModal from '../../components/PlayerSelectionModal';
 import { useNavigate } from 'react-router-dom';
 
