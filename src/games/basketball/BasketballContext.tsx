@@ -6,7 +6,7 @@ import { generateId } from '../../utils';
 // Initial state for a new game
 const initialState: GameState = {
   gameMode: 'FIRST_TO_21',
-  timeRemaining: null,
+  timeRemaining: 300, // Default to 5 minutes
   isGameStarted: false,
   isPaused: false,
   isGameOver: false,
@@ -63,10 +63,11 @@ function basketballGameReducer(state: GameState, action: GameAction): GameState 
       return {
         ...state,
         gameMode: action.gameMode,
-        timeRemaining: gameMode.timeLimit,
+        timeRemaining: gameMode.timeLimit ?? state.timeRemaining, // Use existing time if no time limit
         shotClock: action.gameMode === 'TOURNAMENT' ? 24 : null,
         isGameStarted: true,
-        isPaused: false,
+        isPaused: true, // Start paused
+        isGameOver: false
       };
     }
 
@@ -83,8 +84,16 @@ function basketballGameReducer(state: GameState, action: GameAction): GameState 
         awayTeam: { ...initialState.awayTeam, players: state.awayTeam.players },
       };
 
-    case 'UPDATE_TIME':
-      return { ...state, timeRemaining: action.time };
+    case 'UPDATE_TIME': {
+      const newTime = Math.max(0, action.time);
+      const isGameOver = newTime === 0;
+      return { 
+        ...state, 
+        timeRemaining: newTime,
+        isGameOver: isGameOver || state.isGameOver,
+        isPaused: isGameOver ? true : state.isPaused
+      };
+    }
 
     case 'ADD_PLAYER': {
       const team = action.team === 'HOME' ? 'homeTeam' : 'awayTeam';
@@ -157,9 +166,44 @@ function basketballGameReducer(state: GameState, action: GameAction): GameState 
         playerId: action.event.playerId,
         action: action.event.action,
       };
+
+      // Calculate points based on action type
+      let points = 0;
+      switch (action.event.action) {
+        case 'THREE_POINTER':
+          points = 3;
+          break;
+        case 'TWO_POINTER':
+          points = 2;
+          break;
+        case 'FREE_THROW':
+          points = 1;
+          break;
+        case 'FOUL':
+          points = -1;
+          break;
+        default:
+          points = 0;
+      }
+
+      // Update team score
+      const team = action.event.teamSide === 'HOME' ? 'homeTeam' : 'awayTeam';
+      const newScore = Math.max(0, state[team].score + points);
+
+      // Check if target score is reached
+      const gameMode = GAME_MODES[state.gameMode];
+      const targetScore = gameMode.targetScore;
+      const isGameOver = targetScore ? newScore >= targetScore : state.isGameOver;
+
       return {
         ...state,
         gameEvents: [...state.gameEvents, newEvent],
+        [team]: {
+          ...state[team],
+          score: newScore
+        },
+        isGameOver,
+        isPaused: isGameOver ? true : state.isPaused
       };
     }
 
@@ -205,14 +249,9 @@ export function BasketballGameProvider({ children }: { children: React.ReactNode
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    if (state.isGameStarted && !state.isPaused && state.timeRemaining !== null) {
+    if (state.isGameStarted && !state.isPaused && state.timeRemaining !== null && !state.isGameOver) {
       interval = setInterval(() => {
-        const currentTime = state.timeRemaining;
-        if (currentTime !== null && currentTime > 0) {
-          dispatch({ type: 'UPDATE_TIME', time: currentTime - 1 });
-        } else {
-          dispatch({ type: 'PAUSE_GAME' });
-        }
+        dispatch({ type: 'UPDATE_TIME', time: state.timeRemaining! - 1 });
       }, 1000);
     }
 
@@ -221,7 +260,7 @@ export function BasketballGameProvider({ children }: { children: React.ReactNode
         clearInterval(interval);
       }
     };
-  }, [state.isGameStarted, state.isPaused, state.timeRemaining]);
+  }, [state.isGameStarted, state.isPaused, state.timeRemaining, state.isGameOver]);
 
   return (
     <BasketballGameContext.Provider value={{ state, dispatch }}>

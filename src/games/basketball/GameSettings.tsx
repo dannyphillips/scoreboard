@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { BasketballGameSettings, TIME_PRESETS, SCORE_PRESETS, TEAM_PRESETS } from './types';
 import PlayerSelectionModal from '../../components/PlayerSelectionModal';
+import { useNavigate } from 'react-router-dom';
 
 interface GameSettingsProps {
   settings: BasketballGameSettings;
@@ -18,6 +19,7 @@ export default function GameSettings({
   const [localSettings, setLocalSettings] = useState<BasketballGameSettings>(settings);
   const [showPlayerModal, setShowPlayerModal] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<'home' | 'away'>('home');
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +62,17 @@ export default function GameSettings({
         animate={{ opacity: 1, y: 0 }}
         className="bg-gray-800 rounded-2xl p-8 w-full"
       >
+        {/* Exit Button */}
+        <button
+          onClick={() => navigate('/')}
+          className="absolute top-6 right-6 bg-gray-800 hover:bg-gray-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition-colors text-xl"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+          Exit Game
+        </button>
+
         <h2 className="text-3xl font-bold text-white mb-8 text-center">Game Settings</h2>
         
         <form onSubmit={handleSubmit} className="space-y-8">
