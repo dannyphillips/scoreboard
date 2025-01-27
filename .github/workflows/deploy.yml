@@ -30,6 +30,14 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Debug Env
+        run: |
+          echo "Checking environment variables..."
+          echo "FIREBASE_API_KEY set: ${{ secrets.FIREBASE_API_KEY != '' }}"
+          echo "FIREBASE_AUTH_DOMAIN set: ${{ secrets.FIREBASE_AUTH_DOMAIN != '' }}"
+          echo "FIREBASE_PROJECT_ID set: ${{ secrets.FIREBASE_PROJECT_ID != '' }}"
+          echo "FIREBASE_APP_ID set: ${{ secrets.FIREBASE_APP_ID != '' }}"
+
       - name: Build
         run: bun run build
         env:
