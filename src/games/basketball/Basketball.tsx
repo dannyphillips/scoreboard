@@ -64,26 +64,6 @@ export default function Basketball() {
     });
   };
 
-  // Update the defaultTeams object
-  const defaultTeams = {
-    home: {
-      name: 'Home Team',
-      color: '#4A90E2',
-      logo: getImagePath('/images/teams/home-team.png'),
-      score: 0,
-      fouls: 0,
-      timeouts: 4
-    },
-    away: {
-      name: 'Away Team',
-      color: '#E24A4A',
-      logo: getImagePath('/images/teams/away-team.png'),
-      score: 0,
-      fouls: 0,
-      timeouts: 4
-    }
-  };
-
   // Update the defaultLogos object
   const defaultLogos = {
     home: getImagePath('/images/teams/home-team.png'),
