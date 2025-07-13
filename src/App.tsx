@@ -19,9 +19,18 @@ const Loading = () => (
   </div>
 );
 
+// Get basename from environment variable, default to '/' for local development
+const basename = import.meta.env.VITE_BASE_URL || '/';
+
 function App() {
   return (
-    <Router basename="/scoreboard">
+    <Router 
+      basename={basename}
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <div className="min-h-screen bg-scoreboard-light-bg">
         <Navigation />
         <main className="container mx-auto px-4 py-8">
