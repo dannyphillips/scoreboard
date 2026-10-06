@@ -27,4 +27,4 @@ COPY --from=build /app/dist ./dist
 ENV NODE_ENV=production PORT=5000
 USER node
 EXPOSE 5000
-CMD ["node", "server/server.js"]
+CMD ["node", "server/server.cjs"]

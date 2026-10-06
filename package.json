@@ -12,7 +12,7 @@
     "test": "bun test",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
-    "start": "node server/server.js"
+    "start": "node server/server.cjs"
   },
   "dependencies": {
     "express": "^4.22.3",

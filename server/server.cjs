@@ -5,7 +5,7 @@
 
 const path = require('path');
 const express = require('express');
-const { familySession } = require('./session');
+const { familySession } = require('./session.cjs');
 
 const PORT = Number(process.env.PORT) || 5000;
 const SECRET = process.env.SESSION_SECRET || '';
