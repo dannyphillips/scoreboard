@@ -1,3 +1,5 @@
+> **Archived.** This app now lives in the [dannyphillips/apps](https://github.com/dannyphillips/apps) monorepo at [`apps/scoreboard`](https://github.com/dannyphillips/apps/tree/main/apps/scoreboard). This repository is read-only.
+
 # Scoreboard
 
 Vite + React + TypeScript scoreboard. Firebase Auth and Firestore run in the browser; this repo has no backend.
